@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>غسيل سيارات متنقل — تأكيد الحجز والدفع</title>
 
-  <!-- خطوط وواجهات -->
+  <!-- واجهات -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -26,17 +26,17 @@
     .btn.primary { background:#39c; color:#000; }
     .btn.success { background:#2ecc71; color:#000; }
     .btn[disabled] { opacity: 0.6; cursor: not-allowed; }
-    .container { display: flex; flex-direction: column; gap: 20px; padding: 10px; }
-    .hero { text-align: center; padding: 20px; background: linear-gradient(45deg, #39c, #3cd2ad); border-radius: 15px; }
+    .container { display:flex; flex-direction:column; gap:20px; padding:10px; }
+    .hero { text-align:center; padding:20px; background: linear-gradient(45deg, #39c, #3cd2ad); border-radius: 15px; }
     .hero h1 { font-size: 2.2rem; margin: 0 0 6px; }
     .price { font-size: 1.4rem; font-weight: 700; }
     .hint { font-size: 0.9rem; color:#9fb; }
     .inline-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 
-    /* نافذة الخريطة (Modal) */
-    .map-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display:none; align-items: center; justify-content: center; z-index: 9999; }
-    .map-card { width: min(94vw, 820px); background:#121833; border-radius:12px; padding:12px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-    #map { width: 100%; height: 420px; border-radius:10px; }
+    /* نافذة الخريطة */
+    .map-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:9999; }
+    .map-card { width:min(94vw, 820px); background:#121833; border-radius:12px; padding:12px; box-shadow:0 10px 30px rgba(0,0,0,0.4); }
+    #map { width:100%; height:420px; border-radius:10px; }
     .map-actions { display:flex; gap:10px; justify-content:flex-start; margin-top:10px; }
   </style>
 </head>
@@ -47,7 +47,7 @@
   </section>
 
   <section class="container">
-    <div class="left">
+    <div>
       <form class="formWrap" id="bookingForm">
         <fieldset>
           <legend>بيانات العميل</legend>
@@ -90,9 +90,12 @@
           <label for="time">الوقت</label>
           <input id="time" type="text" required />
 
-          <!-- موقع السيارة + خريطة -->
+          <!-- موقع السيارة -->
           <label for="address">موقع السيارة</label>
-          <input id="address" type="text" placeholder="انقر لاختيار الموقع على الخريطة" readonly />
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <input id="address" type="text" placeholder="انقر لاختيار الموقع على الخريطة" readonly style="flex:1;" />
+            <button class="btn" type="button" id="useMyLocationBtn" title="استخدام موقعي الحالي">استخدام موقعي الحالي</button>
+          </div>
           <input type="hidden" id="lat" name="lat" />
           <input type="hidden" id="lng" name="lng" />
         </fieldset>
@@ -100,10 +103,10 @@
         <div id="priceSection" class="inline-actions">
           <p class="price">السعر: <span id="priceValue">0</span> ر.ع</p>
 
-          <!-- زر تأكيد الحجز (pending) -->
+          <!-- تأكيد الحجز -->
           <button class="btn success" type="button" id="confirmBtn" disabled>تأكيد الحجز</button>
 
-          <!-- زر الدفع (مرئي دائمًا، لكنه يُفعل بعد التأكيد) -->
+          <!-- الدفع (يُفعّل بعد التأكيد) -->
           <button class="btn primary" type="button" id="payNowTopBtn" disabled>الدفع</button>
 
           <div class="hint">الدفع يتفعّل بعد تأكيد الحجز.</div>
@@ -151,201 +154,3 @@
   <script>
     // Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyC_kRUAmKIFQwWK0Xrr8PeebnQbWGauu34",
-      authDomain: "wash-a7ef9.firebaseapp.com",
-      projectId: "wash-a7ef9",
-      storageBucket: "wash-a7ef9.firebasestorage.app",
-      messagingSenderId: "244309029995",
-      appId: "1:244309029995:web:b5cb0534edce26aac3ed2e"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    // خريطة
-    let map, marker, lastLatLng = null;
-    let currentBookingId = null;
-
-    $(function() {
-      // Widgets
-      $("#date").datepicker({ dateFormat: 'yy-mm-dd', minDate: 0 });
-      $('#time').timepicker({ timeFormat: 'HH:mm', interval: 15, minTime: '08:00', maxTime: '21:00' });
-
-      // خريطة
-      $('#address').on('click', openMapModal);
-      $('#confirmLocationBtn').on('click', confirmPickedLocation);
-      $('#closeMapBtn').on('click', closeMapModal);
-
-      // Price / confirm
-      $('#size, #package').on('change', updatePrice);
-      updatePrice();
-
-      // Flow
-      document.getElementById('confirmBtn').addEventListener('click', onConfirmBooking);
-      document.getElementById('paymentButton').addEventListener('click', onCompletePayment);
-    });
-
-    function calcPrice(size, pkg) {
-      if (size === 'saloon' && pkg === 'both') return 1.5;
-      if (size === '4x4' && pkg === 'both') return 2;
-      if (size === 'saloon' && pkg === 'external') return 1;
-      if (size === '4x4' && pkg === 'external') return 1.5;
-      return 0;
-    }
-
-    function updatePrice() {
-      const size = document.getElementById('size').value;
-      const pkg  = document.getElementById('package').value;
-      const price = calcPrice(size, pkg);
-      document.getElementById('priceValue').innerText = price.toFixed(2);
-
-      const confirmBtn = document.getElementById('confirmBtn');
-      confirmBtn.disabled = !(price > 0);
-      // زر الدفع العلوي يظل Disabled حتى يتم التأكيد
-    }
-
-    function openMapModal() {
-      const modal = document.getElementById('mapModal');
-      modal.style.display = 'flex';
-
-      setTimeout(() => {
-        if (!map) {
-          map = L.map('map');
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-          }).addTo(map);
-          // مسقط افتراضياً
-          map.setView([23.5880, 58.3829], 12);
-
-          // موقعي الحالي (نقطة زرقاء + دائرة)
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => {
-              const userLatLng = [pos.coords.latitude, pos.coords.longitude];
-              map.setView(userLatLng, 15);
-
-              // نقطة زرقاء مثل جوجل
-              const blueIcon = L.divIcon({
-                html: '<div style="width:20px;height:20px;background:#4285F4;border:3px solid white;border-radius:50%;box-shadow:0 0 6px rgba(66,133,244,0.8);"></div>',
-                className: ""
-              });
-              L.marker(userLatLng, { icon: blueIcon })
-                .addTo(map)
-                .bindPopup("موقعي الحالي")
-                .openPopup();
-
-              // دائرة شفافة حول الموقع
-              L.circle(userLatLng, {
-                radius: 120, // متر
-                color: '#4285F4',
-                fillColor: '#4285F4',
-                fillOpacity: 0.2
-              }).addTo(map);
-            });
-          }
-
-          // النقر يضع/يحرك علامة موقع السيارة
-          map.on('click', function(e) { setMarker(e.latlng); });
-        }
-        setTimeout(() => map.invalidateSize(), 50);
-      }, 0);
-    }
-
-    function setMarker(latlng) {
-      lastLatLng = latlng;
-      if (!marker) {
-        marker = L.marker(latlng, { draggable: true }).addTo(map);
-        marker.on('dragend', () => {
-          lastLatLng = marker.getLatLng();
-          updatePickedCoordsText();
-        });
-      } else {
-        marker.setLatLng(latlng);
-      }
-      updatePickedCoordsText();
-    }
-
-    function updatePickedCoordsText() {
-      if (!lastLatLng) return;
-      document.getElementById('pickedCoords').textContent =
-        `الموقع المحدد: ${lastLatLng.lat.toFixed(6)}, ${lastLatLng.lng.toFixed(6)}`;
-    }
-
-    function confirmPickedLocation() {
-      if (!lastLatLng) {
-        alert('انقر على الخريطة لتحديد موقع السيارة.');
-        return;
-      }
-      document.getElementById('lat').value = lastLatLng.lat.toFixed(6);
-      document.getElementById('lng').value = lastLatLng.lng.toFixed(6);
-      document.getElementById('address').value =
-        `${lastLatLng.lat.toFixed(6)}, ${lastLatLng.lng.toFixed(6)}`;
-      closeMapModal();
-    }
-
-    function closeMapModal() {
-      document.getElementById('mapModal').style.display = 'none';
-    }
-
-    async function onConfirmBooking() {
-      const form = document.getElementById('bookingForm');
-      if (!form.checkValidity()) { form.reportValidity(); return; }
-
-      const booking = getBookingFromForm();
-
-      try {
-        const docRef = await db.collection('bookings').add(booking);
-        currentBookingId = docRef.id;
-        console.log('Booking saved (pending), id:', currentBookingId);
-
-        // فعّل زر الدفع العلوي الآن
-        const payNowTopBtn = document.getElementById('payNowTopBtn');
-        payNowTopBtn.disabled = false;
-        payNowTopBtn.onclick = () => {
-          document.getElementById('paymentSection').style.display = 'block';
-          document.getElementById('paymentSection').scrollIntoView({ behavior: 'smooth' });
-        };
-
-        // أظهر قسم الدفع أيضاً مباشرة
-        document.getElementById('paymentSection').style.display = 'block';
-        document.getElementById('paymentSection').scrollIntoView({ behavior: 'smooth' });
-      } catch (err) {
-        console.error('Save error:', err);
-        alert('حصل خطأ أثناء حفظ الحجز. تأكد من تفعيل Cloud Firestore ثم أعد المحاولة.');
-      }
-    }
-
-    function getBookingFromForm() {
-      return {
-        name: document.getElementById('name').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
-        make: document.getElementById('make').value.trim(),
-        plate: document.getElementById('plate').value.trim(),
-        color: document.getElementById('color').value.trim(),
-        size: document.getElementById('size').value,
-        package: document.getElementById('package').value,
-        date: document.getElementById('date').value,
-        time: document.getElementById('time').value,
-        address: document.getElementById('address').value.trim(),
-        lat: document.getElementById('lat').value || null,
-        lng: document.getElementById('lng').value || null,
-        price: parseFloat(document.getElementById('priceValue').innerText) || 0,
-        status: 'pending',
-        createdAt: new Date().toISOString()
-      };
-    }
-
-    async function onCompletePayment() {
-      try {
-        if (!currentBookingId) { alert('لا يوجد حجز قيد التأكيد.'); return; }
-        await db.collection('bookings').doc(currentBookingId).update({
-          status: 'confirmed',
-          paidAt: new Date().toISOString()
-        });
-        alert('تم الدفع وتأكيد الحجز بنجاح ✅');
-      } catch (err) {
-        console.error('Confirm error:', err);
-        alert('حصل خطأ أثناء تأكيد الدفع.');
-      }
-    }
-  </script>
-</body>
-</html>
