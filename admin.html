@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>لمعة — لوحة الطلبات</title>
+  <style>
+    :root{
+      --bg1:#e6f7ff; --bg2:#f0fffb; --ink:#0f1a2b;
+      --card:#ffffff; --line:#e6eef8;
+      --red:#ef4444; --green:#00d2a0; --blue:#00aaff;
+      --muted:#5f7aa3;
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family:Tajawal,system-ui,Arial;
+      background: radial-gradient(1200px 700px at 80% -10%, var(--bg1), transparent 60%), linear-gradient(180deg, var(--bg1), var(--bg2));
+      color:var(--ink); margin:0
+    }
+    header{
+      display:flex; align-items:center; gap:12px; padding:10px 14px;
+      background:linear-gradient(135deg, rgba(0,170,255,.12), rgba(0,210,160,.10)), #ffffffaa;
+      border-bottom:1px solid var(--line);
+      backdrop-filter:saturate(1.2) blur(2px);
+    }
+    header img{width:44px;height:44px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.06)}
+    header h3{margin:0;font-size:1.1rem}
+    header small{color:var(--muted)}
+    .wrap{max-width:980px;margin:12px auto 96px;padding:0 12px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 8px 22px rgba(0,0,0,.05)}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .pill{padding:4px 10px;border-radius:999px;background:#eaf4ff;color:#0b4a7a;font-size:12px;border:1px solid var(--line)}
+    button{border:none;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:800}
+    button.red{background:var(--red);color:#fff}
+    button.green{background:var(--green);color:#003326}
+    button.blue{background:var(--blue);color:#fff}
+    button:disabled{opacity:.9;filter:saturate(.8);cursor:not-allowed}
+    small{opacity:.85;color:var(--muted)}
+    .empty{opacity:.8;text-align:center;padding:16px}
+    .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .report-fab-wrap{position:fixed;left:0;right:0;bottom:14px;display:flex;justify-content:center;z-index:9999;pointer-events:none}
+    .report-fab{pointer-events:auto;background:var(--blue);color:#fff;border:none;border-radius:999px;padding:12px 18px;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:10000}
+    .modal{width:min(96vw,920px);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 16px 40px rgba(0,0,0,.18)}
+    .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .modal-head h3{margin:0}
+    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+    select{background:#f8fbff;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+    .tile{background:#f8fbff;border:1px solid var(--line);border-radius:12px;padding:12px}
+    .tile b{display:block;font-size:14px;opacity:.9}
+    .tile span{display:block;font-size:20px;margin-top:6px}
+  </style>
+</head>
+<body>
+<header>
+  <img src="https://i.ibb.co/k2wtWBrW/unnamed.jpg" alt="شعار لمعة">
+  <div>
+    <h3>لوحة الطلبات — لمعة</h3>
+    <small id="permNote">🔔 فعّل الإشعارات</small>
+  </div>
+</header>
+
+<div class="wrap" id="list"></div>
+
+<div class="report-fab-wrap">
+  <button class="report-fab" id="openReportBtn">📊 تقرير</button>
+</div>
+
+<div class="modal-backdrop" id="reportModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>تقرير الطلبات</h3>
+      <button class="red" id="closeReportBtn">إغلاق ✖</button>
+    </div>
+    <div class="controls">
+      <label>النطاق الزمني:</label>
+      <select id="range">
+        <option value="today">اليوم</option>
+        <option value="week">هذا الأسبوع</option>
+        <option value="month">هذا الشهر</option>
+        <option value="all" selected>الكل</option>
+      </select>
+      <button class="blue" id="runReportBtn">عرض التقرير</button>
+    </div>
+    <div id="reportResult" class="grid"></div>
+  </div>
+</div>
+
+<audio id="ding" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+  // Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyC_kRUAmKIFQwWK0Xrr8PeebنQbWGauu34".replace('ن','C'), // تصحيح أي نسخ لاصق
+    authDomain: "wash-a7ef9.firebaseapp.com",
+    projectId: "wash-a7ef9",
+    storageBucket: "wash-a7ef9.firebasestorage.app",
+    messagingSenderId: "244309029995",
+    appId: "1:244309029995:web:b5cb0534edce26aac3ed2e"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // إشعارات سطح المكتب
+  if ('Notification' in window) {
+    Notification.requestPermission().then(p=>{
+      document.getElementById('permNote').textContent =
+        (p==='granted' ? 'الإشعارات مفعلة ✅' : '🔔 فعّل الإشعارات من متصفحك');
+    });
+  }
+
+  const list = document.getElementById('list');
+  const ding  = document.getElementById('ding');
+
+  // حالة الواجهة
+  const live = new Map(); // id -> data
+  function renderFromLive(){
+    const arr = Array.from(live.values())
+      .sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||'')); // الأقدم أولاً
+    render(arr);
+  }
+
+  // ✅ فحص سريع لصلاحيات القراءة (لو القواعد تمنع القراءة يظهر تنبيه)
+  db.collection('bookings').limit(1).get()
+    .then(()=>console.log('[admin] read test OK'))
+    .catch(err=>{
+      console.error('[admin] read test failed:', err);
+      list.innerHTML = `
+        <div class="card" style="border-color:#ffb4b4">
+          تعذر قراءة الطلبات من Firestore (قد تكون قواعد الحماية تمنع القراءة).<br>
+          <small>افتح Console للاطلاع على التفاصيل.</small>
+        </div>`;
+    });
+
+  // ✅ مستمع واحد للحالات المطلوبة (يشمل confirmed)
+  let unsub = db.collection('bookings')
+    .where('status', 'in', ['pending','accepted','confirmed'])
+    .onSnapshot(
+      snap=>{
+        snap.docChanges().forEach(ch=>{
+          const id = ch.doc.id;
+          const data = { id, ...ch.doc.data() };
+
+          if (ch.type === 'added' || ch.type === 'modified') {
+            live.set(id, data);
+
+            // جرس عند إضافة طلب جديد بانتظار أو مدفوع مباشرة
+            if (ch.type==='added' && (data.status==='pending' || data.status==='confirmed')){
+              try{ ding.currentTime=0; ding.play(); }catch(e){}
+              if (Notification.permission==='granted'){
+                new Notification('طلب جديد 🚗',{ body: data.status==='confirmed' ? 'طلب جديد مدفوع' : 'وارد جديد في الانتظار', silent:false });
+              }
+            }
+          } else if (ch.type === 'removed') {
+            live.delete(id);
+          }
+        });
+        renderFromLive();
+      },
+      err=>{
+        console.error('[admin] onSnapshot error:', err);
+        list.innerHTML = `
+          <div class="card" style="border-color:#ffb4b4">
+            تعذر الاشتراك في التحديثات اللحظية: ${err.message || err}
+          </div>`;
+      }
+    );
+
+  // ⛑️ باك-أب: Polling كل 10 ثوانٍ (ينفع إذا onSnapshot ما اشتغل على iOS)
+  async function poll(){
+    try{
+      const snap = await db.collection('bookings')
+        .where('status', 'in', ['pending','accepted','confirmed'])
+        .get();
+      const fetched = new Map();
+      snap.docs.forEach(d=>{
+        const data = { id:d.id, ...d.data() };
+        fetched.set(d.id, data);
+      });
+      // حدّث live لو اختلف
+      let changed = false;
+      // أضف/حدّث
+      for (const [id,data] of fetched){
+        const old = live.get(id);
+        if (!old || JSON.stringify(old) !== JSON.stringify(data)){
+          live.set(id, data); changed = true;
+        }
+      }
+      // احذف التي لم تعد موجودة
+      for (const id of Array.from(live.keys())){
+        if (!fetched.has(id)){ live.delete(id); changed = true; }
+      }
+      if (changed) renderFromLive();
+    }catch(e){
+      console.error('[admin] polling error:', e);
+    }
+  }
+  setInterval(poll, 10000);
+
+  // أدوات العرض
+  function currency(n){ return (+(n||0)).toFixed(2) + ' ر.ع'; }
+  function statusLabel(s){
+    return s==='pending'   ? 'قيد الانتظار' :
+           s==='accepted'  ? 'مستلمة' :
+           s==='confirmed' ? 'مدفوعة/مؤكدة' :
+           s==='completed' ? 'تم التنفيذ' :
+           s==='rejected'  ? 'مرفوضة' : s;
+  }
+
+  function render(items){
+    list.innerHTML = '';
+    if (!items.length){
+      list.innerHTML = '<div class="empty">لا توجد طلبات (انتظار/مستلمة/مدفوعة).</div>';
+      return;
+    }
+    items.forEach(x=>{
+      const el = document.createElement('div');
+      el.className = 'card';
+      const acceptedOrPaid = (x.status === 'accepted' || x.status === 'confirmed');
+
+      el.innerHTML = `
+        <div class="row" style="justify-content:space-between;">
+          <div><b>الهاتف:</b> ${x.phone || '—'}</div>
+          <div class="pill">الحالة: ${statusLabel(x.status)}</div>
+        </div>
+        <div class="row">
+          <div><b>نوع السيارة:</b> ${x.carType || '—'}</div>
+          <div><b>نوع الغسيل:</b> ${x.package==='both'?'خارجي وداخلي': (x.package==='external'?'خارجي':'—')}</div>
+          <div><b>السعر:</b> ${currency(x.price)}</div>
+        </div>
+        <div class="row"><b>الموقع:</b> ${x.address || '—'}</div>
+        <small>وقت الإنشاء: ${x.createdAt || '—'}</small>
+        <div class="tools">
+          <button class="${acceptedOrPaid?'green':'blue'}"
+                  id="assign-${x.id}"
+                  ${acceptedOrPaid?'disabled':''}
+                  onclick="markAccepted('${x.id}', this)">${acceptedOrPaid?'🚚 مستلمة/مدفوعة':'استلام المهمة'}</button>
+
+          <button class="green" id="done-${x.id}"   onclick="markCompleted('${x.id}', this)">تم التنفيذ ✔</button>
+          <button class="red"   id="reject-${x.id}" onclick="markRejected('${x.id}', this)">رفض المهمة ✖</button>
+          <button class="blue"  onclick="openMap(${x.lat||'null'}, ${x.lng||'null'})">عرض الخريطة</button>
+        </div>
+      `;
+      list.appendChild(el);
+    });
+  }
+
+  function openMap(lat, lng){
+    if (!lat || !lng) { alert('لا يوجد إحداثيات'); return; }
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank');
+  }
+
+  // أزرار التحكم بالحالات
+  async function markAccepted(id, btn){
+    if (btn && btn.classList.contains('green')) return;
+    await db.collection('bookings').doc(id).update({
+      status:'accepted', acceptedAt:new Date().toISOString()
+    });
+    if (btn){
+      btn.classList.remove('blue');
+      btn.classList.add('green');
+      btn.textContent = '🚚 مستلمة';
+      btn.disabled = true;
+    }
+  }
+
+  async function markRejected(id, btn){
+    await db.collection('bookings').doc(id).update({
+      status:'rejected', rejectedAt:new Date().toISOString()
+    });
+    const card = btn.closest('.card'); if (card) card.remove();
+    live.delete(id); renderFromLive();
+  }
+
+  async function markCompleted(id, btn){
+    await db.collection('bookings').doc(id).update({
+      status:'completed', completedAt:new Date().toISOString()
+    });
+    const card = btn.closest('.card'); if (card) card.remove();
+    live.delete(id); renderFromLive();
+  }
+
+  // التقرير
+  const modal = document.getElementById('reportModal');
+  const openBtn = document.getElementById('openReportBtn');
+  const closeBtn = document.getElementById('closeReportBtn');
+  const runBtn = document.getElementById('runReportBtn');
+  const rangeSel = document.getElementById('range');
+  const out = document.getElementById('reportResult');
+
+  openBtn.addEventListener('click', ()=>{ modal.style.display='flex'; out.innerHTML=''; });
+  closeBtn.addEventListener('click', ()=> modal.style.display='none');
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.style.display='none'; });
+
+  runBtn.addEventListener('click', async ()=>{
+    out.innerHTML = '<div class="tile"><b>جار التحميل…</b></div>';
+    try{
+      const snap = await db.collection('bookings')
+        .where('status', 'in', ['pending','accepted','confirmed','completed','rejected'])
+        .get();
+      const all = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+      const filtered = filterByRange(all, rangeSel.value);
+
+      const sum = (arr, key)=> arr.reduce((a,x)=> a + (+x[key]||0), 0);
+      const byStatus = s => filtered.filter(x=> x.status===s);
+      const totalPrice = sum(filtered, 'price');
+
+      const stats = {
+        totalCount   : filtered.length,
+        totalPrice   : totalPrice,
+        pendingCount : byStatus('pending').length,
+        acceptedCount: byStatus('accepted').length,
+        confirmedCount: byStatus('confirmed').length,
+        completedCount: byStatus('completed').length,
+        rejectedCount: byStatus('rejected').length,
+        pendingPrice : sum(byStatus('pending'), 'price'),
+        acceptedPrice: sum(byStatus('accepted'), 'price'),
+        confirmedPrice: sum(byStatus('confirmed'), 'price'),
+        completedPrice: sum(byStatus('completed'), 'price'),
+        rejectedPrice: sum(byStatus('rejected'), 'price'),
+      };
+      renderReport(stats);
+    }catch(e){
+      console.error(e);
+      out.innerHTML = '<div class="tile">فشل إنشاء التقرير</div>';
+    }
+  });
+
+  function renderReport(s){
+    const currency = n => (+(n||0)).toFixed(2)+' ر.ع';
+    out.innerHTML = `
+      <div class="tile"><b>إجمالي الطلبات</b><span>${s.totalCount}</span></div>
+      <div class="tile"><b>إجمالي السعر</b><span>${currency(s.totalPrice)}</span></div>
+      <div class="tile"><b>قيد الانتظار</b><span>${s.pendingCount} | ${currency(s.pendingPrice)}</span></div>
+      <div class="tile"><b>تم الاستلام</b><span>${s.acceptedCount} | ${currency(s.acceptedPrice)}</span></div>
+      <div class="tile"><b>مدفوعة/مؤكدة</b><span>${s.confirmedCount} | ${currency(s.confirmedPrice)}</span></div>
+      <div class="tile"><b>تم التنفيذ</b><span>${s.completedCount} | ${currency(s.completedPrice)}</span></div>
+      <div class="tile"><b>مرفوضة</b><span>${s.rejectedCount} | ${currency(s.rejectedPrice)}</span></div>
+    `;
+  }
+
+  function filterByRange(items, range){
+    if (range==='all') return items;
+    const now = new Date();
+    let start = new Date(0);
+    if (range==='today'){
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    } else if (range==='week'){
+      const day = now.getDay() || 7;
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (day-1));
+    } else if (range==='month'){
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+    return items.filter(x=>{
+      const t = x.createdAt ? Date.parse(x.createdAt) : 0;
+      return t >= +start && t <= +now;
+    });
+  }
+</script>
+</body>
+</html>
