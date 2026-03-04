@@ -1,0 +1,4530 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تطبيق اللياقة الشخصي — سعرات/بروتين + جدول تمارين</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;700;800&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0d1513;
+      --card:#12201d;
+      --card2:#0f1b18;
+      --text:#edf7f2;
+      --muted:#a8c1b7;
+      --line:rgba(255,255,255,.08);
+      --accent:#5fcfa7;
+      --good:#4ee0b0;
+      --warn:#f6c36f;
+      --bad:#ff7c86;
+      --shadow: 0 14px 34px rgba(0,0,0,.34);
+      --radius:18px;
+      --font: "Tajawal", system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% 0%, rgba(122,167,255,.18), transparent 60%),
+        radial-gradient(900px 500px at 90% 10%, rgba(88,214,141,.12), transparent 55%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      min-height:100vh;
+    }
+    header{
+      padding:18px 14px 6px;
+      position:sticky; top:0;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(7,11,20,.85), rgba(7,11,20,.55));
+      border-bottom: 1px solid var(--line);
+      z-index:5;
+    }
+    .wrap{max-width:1100px;margin:0 auto;padding:14px;}
+    h1{margin:0;font-size:18px;font-weight:800;letter-spacing:.2px}
+    .sub{margin:6px 0 0;color:var(--muted);font-size:12.5px}
+    .grid{display:grid;gap:12px}
+    @media(min-width:980px){ .grid{grid-template-columns: 420px 1fr;} }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 14px 10px;
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      background: linear-gradient(180deg, rgba(255,255,255,.04), transparent);
+      border-bottom:1px solid var(--line);
+    }
+    .card .hd h2{margin:0;font-size:14.5px}
+    .card .bd{padding:14px}
+    .row2{display:grid;gap:10px}
+    @media(min-width:520px){ .row2{grid-template-columns:1fr 1fr;} }
+    label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+    input, select, textarea{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(17,27,46,.65);
+      color:var(--text);
+      outline:none;
+    }
+    input:focus, select:focus, textarea:focus{border-color: rgba(122,167,255,.55); box-shadow: 0 0 0 3px rgba(122,167,255,.15);}
+    textarea{min-height:92px;resize:vertical}
+    .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    button{
+      border:0;
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:700;
+      cursor:pointer;
+      color: #071022;
+      background: linear-gradient(180deg, var(--accent), #5f8dff);
+      box-shadow: 0 10px 20px rgba(122,167,255,.18);
+    }
+    button.secondary{
+      color:var(--text);
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      box-shadow:none;
+    }
+    button.danger{
+      color: #200708;
+      background: linear-gradient(180deg, #ff8787, #ff5f5f);
+      box-shadow: 0 10px 20px rgba(255,107,107,.18);
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px;border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(17,27,46,.55);
+      color:var(--muted);
+      font-size:12.5px;
+    }
+    .kpis{display:grid;gap:10px}
+    @media(min-width:520px){ .kpis{grid-template-columns:1fr 1fr;} }
+    .kpi{
+      padding:12px;border-radius:14px;border:1px solid var(--line);
+      background: rgba(17,27,46,.45);
+    }
+    .kpi .t{color:var(--muted);font-size:12.5px;margin-bottom:6px}
+    .kpi .v{font-size:20px;font-weight:900}
+    .kpi .s{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.5}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .tab{
+      padding:8px 10px;border-radius:999px;border:1px solid var(--line);
+      background: rgba(17,27,46,.45);
+      color:var(--muted);
+      cursor:pointer;
+      user-select:none;
+      font-size:12.5px;
+    }
+    .tab.active{
+      color: var(--text);
+      border-color: rgba(122,167,255,.45);
+      background: rgba(122,167,255,.12);
+    }
+    .table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: rgba(17,27,46,.35);
+    }
+    .table th, .table td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--line);
+      text-align:right;
+      font-size:12.8px;
+      vertical-align:top;
+    }
+    .table th{color:var(--muted);font-weight:800;background: rgba(255,255,255,.03);}
+    .table tr:last-child td{border-bottom:0}
+    .muted{color:var(--muted)}
+    .hint{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:8px}
+    .split{
+      display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between;
+      margin-top:10px;
+    }
+    .badge{
+      font-size:11.5px;
+      padding:6px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .link{
+      color: var(--accent);
+      text-decoration: none;
+      font-weight:800;
+    }
+    .link:hover{text-decoration:underline}
+    .small{font-size:12px}
+    .footer{padding:10px 14px 24px;color:var(--muted);font-size:12px;line-height:1.6}
+    .hr{height:1px;background:var(--line);margin:12px 0}
+  
+    /* Wellness Green theme overrides */
+    body{
+      background:
+        radial-gradient(1000px 450px at 8% 0%, rgba(95,207,167,.18), transparent 60%),
+        radial-gradient(800px 420px at 90% 10%, rgba(122,167,255,.10), transparent 55%),
+        linear-gradient(180deg, #09100f, #0d1513) !important;
+      color: var(--text);
+    }
+    header{
+      background: linear-gradient(180deg, rgba(9,16,15,.86), rgba(9,16,15,.58));
+      border-bottom:1px solid var(--line);
+    }
+    .card{
+      backdrop-filter: blur(10px);
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .card:hover{
+      transform: translateY(-2px);
+      border-color: rgba(95,207,167,.28);
+      box-shadow: 0 18px 44px rgba(0,0,0,.42);
+    }
+    .kpi{
+      background: rgba(95,207,167,.05);
+      border:1px solid var(--line);
+      position:relative;
+    }
+    .kpi::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(180deg, rgba(255,255,255,.03), transparent 55%);
+      pointer-events:none;
+      border-radius: inherit;
+    }
+    input, select, textarea{
+      background: rgba(255,255,255,.03) !important;
+      border-color: var(--line);
+      color: var(--text);
+      font-size:16px;
+      font-family: var(--font);
+    }
+    input::placeholder, textarea::placeholder{ color: color-mix(in srgb, var(--muted) 80%, white 0%); }
+    button{
+      background: linear-gradient(180deg, var(--accent), #3dbb92);
+      box-shadow: 0 10px 24px rgba(61,187,146,.25);
+      transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+    button:hover{ transform: translateY(-1px); }
+    button:active{ transform: translateY(0); }
+
+    /* Dropdown visibility (mobile + dark) */
+    select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      padding-inline-start: 12px;
+      padding-inline-end: 40px;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position: left 14px center, left 8px center;
+      background-size: 6px 6px, 6px 6px;
+      background-repeat:no-repeat;
+      font-weight:700;
+      text-overflow: ellipsis;
+    }
+    select option, select optgroup{
+      background:#13231f;
+      color:#edf7f2;
+      font-family: var(--font);
+      font-weight:600;
+    }
+    select:focus{
+      border-color: rgba(95,207,167,.55) !important;
+      box-shadow: 0 0 0 3px rgba(95,207,167,.14) !important;
+    }
+
+    /* Auth + modal + profile UX */
+    [hidden]{ display:none !important; }
+    .topUserBar{
+      margin-top:8px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .identityPill{ display:inline-flex; align-items:center; gap:8px; }
+    .avatar{
+      width:26px;height:26px;border-radius:50%;
+      display:inline-flex;align-items:center;justify-content:center;
+      background: rgba(95,207,167,.18);
+      border:1px solid var(--line);
+      font-weight:900;
+      color: var(--text);
+      overflow:hidden;
+      flex: 0 0 auto;
+    }
+    .avatar img{ width:100%;height:100%;object-fit:cover;display:block; }
+    .topUserBtns{ margin-top:0; }
+    .topUserBtns button{
+      min-height:36px;
+      padding:8px 10px;
+      font-size:13px;
+    }
+    .authCard{ max-width:560px; margin:2px auto; }
+    .authBtns button{ flex:1 1 180px; }
+    #authMsg, #accountMsg{
+      margin-top:10px;
+      width:100%;
+      justify-content:center;
+      text-align:center;
+      min-height:36px;
+    }
+    #profileLockHint{
+      margin:2px 0 10px;
+      border:1px dashed var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      background: rgba(95,207,167,.05);
+    }
+    .modal{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:12px;
+      z-index: 999;
+    }
+    .modalCard{ width:min(760px, 100%); }
+    .modalCard .hd{ position:sticky; top:0; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); }
+    .modalClose{ background: rgba(255,255,255,.06); border:1px solid var(--line); color:var(--text); box-shadow:none; }
+    @media(max-width:640px){
+      .topUserBar{ align-items:stretch; }
+      .topUserBar .pill{ width:100%; justify-content:center; }
+      .topUserBtns{ width:100%; }
+      .topUserBtns button{ flex:1 1 calc(50% - 4px); }
+      .authBtns button{ flex-basis:100%; }
+      .modal{ align-items:stretch; }
+      .modalCard{ height:100%; overflow:auto; }
+    }
+
+    /* Better mobile experience */
+    html, body{ max-width:100%; overflow-x:hidden; }
+    button{ min-height:42px; }
+    .tab{ min-height:38px; display:inline-flex; align-items:center; justify-content:center; }
+    @media (max-width: 860px){
+      header{ padding: 12px 10px 6px; }
+      .wrap{ padding: 10px; }
+      h1{ font-size: 16px; line-height: 1.35; }
+      .sub{ font-size: 12px; line-height: 1.5; }
+      .card .hd{ padding: 12px 12px 8px; }
+      .card .bd{ padding: 12px; }
+      .row2{ gap: 8px; }
+      .btns{ gap: 8px; }
+      .btns button{ flex: 1 1 calc(50% - 4px); }
+      .btns button.secondary:last-child,
+      .btns button.danger:last-child{ flex-basis: 100%; }
+      .tabs{
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        padding-bottom: 2px;
+      }
+      .tab{ white-space: nowrap; flex: 0 0 auto; }
+      .table{
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 12px;
+      }
+      .table thead, .table tbody, .table tr{ width: max-content; min-width: 100%; }
+      .table th, .table td{ white-space: nowrap; font-size: 12px; padding: 9px 8px; }
+      .split{ gap: 6px; }
+      .badge{ font-size: 11px; }
+    }
+    @media (max-width: 480px){
+      .btns button{ flex-basis: 100%; }
+      .kpi .v{ font-size: 18px; }
+      label{ font-size: 12px; }
+      input, select, textarea{ border-radius: 10px; }
+      textarea{ min-height: 84px; }
+    }
+
+
+    /* ===== Light Cards Home (override) ===== */
+    :root{
+      --bg:#f3f7fb !important;
+      --card:#ffffff !important;
+      --card2:#f7fbff !important;
+      --text:#182235 !important;
+      --muted:#6c7a95 !important;
+      --line:rgba(25,40,70,.10) !important;
+      --accent:#39b68a !important;
+      --good:#25b67b !important;
+      --warn:#f0b04f !important;
+      --bad:#ef5f6c !important;
+      --shadow:0 10px 30px rgba(31,42,68,.08) !important;
+      --radius:18px !important;
+      --font:"Tajawal", system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif !important;
+    }
+    body{
+      background:
+        radial-gradient(900px 420px at 10% 0%, rgba(79,140,255,.10), transparent 60%),
+        radial-gradient(700px 350px at 90% 10%, rgba(57,182,138,.09), transparent 55%),
+        linear-gradient(180deg, #f8fbff, #eef3fa) !important;
+      color:var(--text) !important;
+    }
+    header{
+      background: rgba(255,255,255,.78) !important;
+      border-bottom:1px solid var(--line) !important;
+      backdrop-filter: blur(10px);
+    }
+    h1{ font-family:"Alexandria", var(--font); color:#17243a; }
+    .sub{ color:var(--muted) !important; }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.97), rgba(255,255,255,.93)) !important;
+      border:1px solid var(--line) !important;
+      box-shadow: var(--shadow) !important;
+    }
+    .card .hd{ background: linear-gradient(180deg, rgba(79,140,255,.05), transparent) !important; }
+    .kpi{ background:#f8fbff !important; }
+    .pill,.badge,.tab{
+      background: rgba(79,140,255,.06) !important;
+      color: var(--muted) !important;
+      border-color: var(--line) !important;
+    }
+    .tab.active{
+      background: rgba(79,140,255,.12) !important;
+      border-color: rgba(79,140,255,.28) !important;
+      color: var(--text) !important;
+    }
+    input,select,textarea{
+      background:#fff !important;
+      color:var(--text) !important;
+      border:1px solid var(--line) !important;
+      font-family: var(--font) !important;
+    }
+    input::placeholder, textarea::placeholder{ color:#90a0bb !important; }
+    select{
+      background-image:
+        linear-gradient(45deg, transparent 50%, #7b89a2 50%),
+        linear-gradient(135deg, #7b89a2 50%, transparent 50%) !important;
+    }
+    select option, select optgroup{ background:#fff !important; color:#182235 !important; }
+    input:focus,select:focus,textarea:focus{
+      border-color: rgba(79,140,255,.45) !important;
+      box-shadow: 0 0 0 3px rgba(79,140,255,.12) !important;
+    }
+    button{
+      color:#fff !important;
+      background: linear-gradient(180deg, #4f8cff, #3f7ef6) !important;
+      box-shadow: 0 10px 20px rgba(79,140,255,.20) !important;
+      border:0 !important;
+    }
+    button.secondary{
+      color:#1c2b46 !important;
+      background: #fff !important;
+      border:1px solid var(--line) !important;
+      box-shadow:none !important;
+    }
+    button.danger{
+      color:#fff !important;
+      background: linear-gradient(180deg, #ef6d78, #e45561) !important;
+      box-shadow: 0 10px 20px rgba(239,95,108,.18) !important;
+    }
+    .table{ background:#fff !important; }
+    .table th{ background:#f7fbff !important; }
+    .table tbody tr:nth-child(even){ background: rgba(79,140,255,.03); }
+    .link{ color:#3f7ef6 !important; }
+
+    /* Home cards layout */
+    #appMain.cardsHomeEnabled{ display:block !important; max-width:1100px; }
+    #homeHub{ margin-bottom:12px; }
+    .welcomeHero{
+      margin-bottom:12px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.97), rgba(246,251,255,.96));
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .welcomeHero h2{
+      margin:0;
+      font-family:"Alexandria", var(--font);
+      font-size:20px;
+      color:#17243a;
+    }
+    .welcomeHero p{ margin:6px 0 0; color:var(--muted); font-size:13px; }
+    .cardsGrid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    .homeCard{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:linear-gradient(180deg, #ffffff, #f9fbff);
+      box-shadow: var(--shadow);
+      padding:14px;
+      cursor:pointer;
+      transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+      text-align:right;
+      position:relative;
+      overflow:hidden;
+    }
+    .homeCard::before{
+      content:"";
+      position:absolute;
+      inset:0 0 auto 0;
+      height:4px;
+      background:linear-gradient(90deg, rgba(79,140,255,.45), rgba(57,182,138,.45));
+      opacity:.8;
+    }
+    .homeCard:hover{ transform: translateY(-2px); border-color: rgba(79,140,255,.22); }
+    .homeCard .icon{
+      width:44px;height:44px;border-radius:14px;
+      display:inline-flex;align-items:center;justify-content:center;
+      border:1px solid rgba(25,40,70,.10);
+      box-shadow: 0 8px 18px rgba(31,42,68,.07);
+      color:#23314f;
+      font-size:21px;font-weight:700;
+      margin-bottom:10px;
+      background:#fff;
+    }
+    .homeCard h3{ margin:0 0 4px; font-family:"Alexandria", var(--font); font-size:14px; color:#17243a; }
+    .homeCard .desc{ color:var(--muted); font-size:12.5px; line-height:1.5; min-height:36px; }
+    .homeCard .quick{ margin-top:8px; font-weight:800; color:#213252; font-size:13px; }
+    .homeCard.card-daily{
+      background: linear-gradient(180deg, #ffffff, #f7fbff);
+    }
+    .homeCard.card-daily::before{ background: linear-gradient(90deg, rgba(79,140,255,.55), rgba(123,169,255,.35)); }
+    .homeCard.card-daily .icon{ background: linear-gradient(180deg, #eef5ff, #f8fbff); }
+    .homeCard.card-diet{
+      background: linear-gradient(180deg, #ffffff, #f8fffb);
+    }
+    .homeCard.card-diet::before{ background: linear-gradient(90deg, rgba(57,182,138,.55), rgba(95,207,167,.35)); }
+    .homeCard.card-diet .icon{ background: linear-gradient(180deg, #effff8, #fbfffd); }
+    .homeCard.card-workout{
+      background: linear-gradient(180deg, #ffffff, #fffaf4);
+    }
+    .homeCard.card-workout::before{ background: linear-gradient(90deg, rgba(240,176,79,.6), rgba(255,141,98,.35)); }
+    .homeCard.card-workout .icon{ background: linear-gradient(180deg, #fff7e9, #fffdf8); }
+
+    .kpi.kpi-soft-blue{ background:#f5f9ff !important; }
+    .kpi.kpi-soft-green{ background:#f4fffb !important; }
+    .kpi.kpi-soft-peach{ background:#fff9ef !important; }
+    .kpi.kpi-soft-violet{ background:#f8f6ff !important; }
+
+    #detailHeader{
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      margin-bottom:10px;
+    }
+    #detailTitle{ font-family:"Alexandria", var(--font); font-size:15px; font-weight:700; color:#17243a; }
+    #detailBackBtn{ min-height:38px; }
+    #detailViews > *[hidden]{ display:none !important; }
+
+    .dietCard .dietTop{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+    .dietMini{ background:#f8fbff; border:1px solid var(--line); border-radius:14px; padding:12px; }
+    .dietMini .t{ color:var(--muted); font-size:12px; margin-bottom:6px; }
+    .dietMini .v{ font-weight:900; font-size:18px; color:#1f2a44; }
+    .dietMini .s{ color:var(--muted); font-size:12px; margin-top:4px; }
+    .dietPlanBox{ margin-top:10px; border:1px solid var(--line); border-radius:14px; background:#fff; padding:12px; line-height:1.75; color:#1d2a43; }
+    .foodPickerWrap{ margin-top:12px; border:1px solid var(--line); border-radius:16px; background:linear-gradient(180deg, #ffffff, #f8fffb); padding:12px; }
+    .foodPickerHead{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .foodPickerHead .title{ font-weight:900; color:#17243a; font-family:"Alexandria", var(--font); font-size:14px; }
+    .foodPickerHead .subtxt{ color:var(--muted); font-size:12px; margin-top:4px; }
+    .foodPickerToggle{ min-height:40px; white-space:nowrap; }
+    .foodPickerPanel{ margin-top:10px; }
+    .foodSearch label{ display:block; margin-bottom:6px; font-size:12px; color:var(--muted); }
+    .foodGroups{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin-top:10px; }
+    .foodGroup{ border:1px solid var(--line); border-radius:14px; background:#fff; padding:10px; }
+    .foodGroup h4{ margin:0 0 8px; font-size:13px; font-weight:900; color:#1c2b45; }
+    .foodChips{ display:grid; gap:8px; }
+    .foodChip{
+      width:100%;
+      border:1.5px solid #7fa8f1;
+      background:linear-gradient(180deg, #6ea4ff, #4a84f6);
+      color:#132238;
+      min-height:64px; padding:10px 12px; border-radius:14px;
+      font:inherit; font-size:13px; font-weight:700; cursor:pointer;
+      transition:transform .15s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+      display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+      text-align:right; line-height:1.45;
+      box-shadow:0 8px 18px rgba(74,132,246,.16);
+    }
+    .foodChipName{ font-weight:900; color:#0f172a; }
+    .foodChipMeta{ font-size:12px; color:#ffffff; margin-top:4px; }
+    .foodChip:hover{ transform:translateY(-1px); border-color:#5d8ef0; box-shadow:0 10px 22px rgba(74,132,246,.22); }
+    .foodChip.active:hover{ border-color:#e11d48 !important; }
+    .foodChip.active{
+      background:linear-gradient(180deg, #6ea4ff, #4a84f6);
+      border:2.5px solid #e11d48 !important;
+      outline:3px solid rgba(225,29,72,.18);
+      outline-offset:0;
+      color:#132238;
+      box-shadow:0 0 0 3px rgba(225,29,72,.24), inset 0 0 0 1px rgba(255,255,255,.22), 0 10px 22px rgba(74,132,246,.2);
+    }
+    .foodChip.active .foodChipName{ color:#0f172a; }
+    .foodChip.active .foodChipMeta{ color:#ffffff; }
+    .foodPickerActions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .foodSummary{
+      margin-top:10px; border:1px dashed #cfe0ee; border-radius:14px;
+      background:#fbfdff; padding:10px 12px; color:#294161; line-height:1.7;
+    }
+    .foodSummary strong{ color:#11233e; }
+    .dietChoicePlan{
+      margin-top:10px; border:1px solid #dfe7f0; border-radius:14px;
+      background:linear-gradient(180deg, #ffffff, #fbfffd); padding:12px;
+      line-height:1.8; color:#1d2a43;
+    }
+    .dietChoicePlan .muted{ color:var(--muted); }
+    .foodSavedActions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .foodSavedActions[hidden]{ display:none !important; }
+    .foodSavedActions button{ min-height:40px; white-space:nowrap; }
+    .dietWeekIntro{ margin-bottom:10px; color:#20314f; }
+    .weekPlanGrid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin-top:10px; }
+    .weekDayPlan{ border:1px solid var(--line); border-radius:16px; background:linear-gradient(180deg, #ffffff, #f8fbff); padding:12px; box-shadow:0 10px 24px rgba(31,42,68,.05); }
+    .weekDayHead{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:8px; }
+    .weekDayHead strong{ display:block; color:#16304b; font-size:14px; }
+    .weekDayHead span{ color:var(--muted); font-size:12px; white-space:nowrap; }
+    .weekMeals{ display:grid; gap:6px; }
+    .weekMealRow{ border:1px solid rgba(79,140,255,.10); border-radius:12px; padding:8px 10px; background:#fff; }
+    .weekMealRow .lbl{ font-size:12px; font-weight:900; color:#41618d; margin-bottom:2px; }
+    .weekMealRow .txt{ color:#16253f; font-size:13px; line-height:1.7; }
+    .weekMealRow .meta{ color:var(--muted); font-size:11px; margin-top:4px; }
+
+
+    @media(max-width:860px){
+      .cardsGrid{ grid-template-columns:1fr; }
+      .welcomeHero h2{ font-size:18px; }
+      .dietCard .dietTop{ grid-template-columns:1fr; }
+      #detailHeader{ flex-wrap:wrap; }
+      #detailBackBtn{ width:100%; }
+      .foodGroups{ grid-template-columns:1fr; }
+      .foodPickerHead{ flex-direction:column; align-items:stretch; }
+      .foodPickerToggle{ width:100%; }
+      .foodPickerActions button{ width:100%; }
+      .foodSavedActions button{ width:100%; }
+      .weekPlanGrid{ grid-template-columns:1fr; }
+      .weekDayHead{ flex-direction:column; }
+      .weekDayHead span{ white-space:normal; }
+    }
+    
+
+  
+    /* ===== UX patch: one-line selects + nicer popups ===== */
+    /* Keep selected values in one line */
+    select,
+    .table th,
+    .table td{
+      white-space: nowrap;
+    }
+    select{
+      display:block;
+      min-height:46px;
+      line-height:1.2;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    /* Long exercise names look better with slightly smaller size */
+    #exerciseSelect{ font-size:15px !important; font-weight:700; }
+    #daySelect, #libSplitFilter, #activity, #goal, #cardioPref, #sex{
+      font-weight:700;
+    }
+
+    /* Better popup/modal visual style */
+    .modal{
+      background: rgba(15, 23, 42, .32) !important;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding:14px;
+    }
+    .modalCard{
+      width:min(760px, 100%);
+      border-radius:22px !important;
+      border:1px solid var(--line) !important;
+      background: linear-gradient(180deg, #ffffff, #f7fbff) !important;
+      box-shadow: 0 24px 60px rgba(20, 35, 70, .18) !important;
+      overflow:hidden;
+      animation: modalPopIn .18s ease;
+    }
+    .modalCard .hd{
+      background: linear-gradient(180deg, rgba(79,140,255,.08), rgba(79,140,255,.02)) !important;
+      border-bottom:1px solid var(--line);
+      padding-top:12px;
+      padding-bottom:10px;
+    }
+    .modalCard .bd{
+      max-height: min(78vh, 680px);
+      overflow:auto;
+    }
+    .modalClose{
+      border-radius:10px !important;
+      background:#fff !important;
+      color:#1b2a45 !important;
+      border:1px solid var(--line) !important;
+      box-shadow:none !important;
+    }
+    .modalClose:hover{
+      background:#f7fbff !important;
+      border-color: rgba(79,140,255,.22) !important;
+    }
+
+    @keyframes modalPopIn{
+      from{ opacity:0; transform: translateY(8px) scale(.985); }
+      to{ opacity:1; transform: translateY(0) scale(1); }
+    }
+    @keyframes sheetUp{
+      from{ opacity:0; transform: translateY(24px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    /* Mobile: use native select rendering for cleaner dropdown/picker */
+    @media (max-width: 640px){
+      select{
+        -webkit-appearance: menulist !important;
+        appearance: menulist !important;
+        background-image: none !important;
+        padding-inline-start: 10px !important;
+        padding-inline-end: 10px !important;
+        min-height: 48px;
+        font-size: 14px !important;
+      }
+      #exerciseSelect{
+        font-size: 13.5px !important;
+      }
+      .modal{
+        align-items:flex-end !important;
+        justify-content:center;
+        padding:0 !important;
+        background: rgba(15, 23, 42, .26) !important;
+      }
+      .modalCard{
+        width:100% !important;
+        max-height: 92vh;
+        border-radius: 18px 18px 0 0 !important;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        animation: sheetUp .2s ease;
+      }
+      .modalCard .hd{
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+      .modalCard .hd::before{
+        content:"";
+        position:absolute;
+        top:6px;
+        left:50%;
+        transform:translateX(-50%);
+        width:42px;
+        height:4px;
+        border-radius:999px;
+        background: rgba(108,122,149,.35);
+      }
+      .modalCard .hd h2{
+        margin-top:8px;
+      }
+      .modalCard .bd{
+        max-height: calc(92vh - 64px);
+        overflow:auto;
+        padding-bottom:16px;
+      }
+    }
+
+  
+    /* Hide duplicate name chips; keep one welcome greeting in home hero */
+    #userIdentityPill{display:none !important;}
+    #headerGreetingLine{display:none !important;}
+
+    /* Planner modal */
+    .plannerModalCard .bd{ padding-top:12px; }
+    .plannerBox{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+      padding:12px;
+    }
+    .plannerRowTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .plannerAllToggle{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-weight:700;
+      color:#1e2d49;
+      cursor:pointer;
+      user-select:none;
+    }
+    .plannerAllToggle input{ width:18px; height:18px; }
+    .plannerChecks{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0, 1fr));
+      gap:8px;
+    }
+    .plannerChecks label{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:10px 10px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+      font-weight:700;
+      color:#20304e;
+      cursor:pointer;
+      min-height:42px;
+    }
+    .plannerChecks label input{ width:16px; height:16px; accent-color: var(--accent); }
+    .plannerOutput{
+      margin-top:12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      padding:12px;
+      line-height:1.75;
+      color:#1b2943;
+      white-space:normal;
+    }
+    .plannerOutput .planDay{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+      margin-top:8px;
+      background: #fbfdff;
+    }
+    .plannerOutput .planDay:first-child{ margin-top:0; }
+    .plannerOutput .planDay h4{
+      margin:0 0 6px;
+      font-family:"Alexandria", var(--font);
+      font-size:13px;
+      color:#17243a;
+    }
+    .plannerOutput .planMeta{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:6px;
+    }
+    .plannerOutput ul{
+      margin:0;
+      padding-right:18px;
+    }
+    .plannerOutput li{ margin:2px 0; }
+    .plannerOutput .planDayHead{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:8px;
+    }
+    .plannerOutput .planBadge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(61,187,146,.10);
+      border:1px solid rgba(61,187,146,.22);
+      color:#1a6a52;
+      font-size:11px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .plannerOutput .planSubTitle{
+      font-size:12px;
+      color:#4a5a76;
+      font-weight:700;
+      margin-top:2px;
+    }
+    .plannerOutput .planTable{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      border:1px solid rgba(30,45,73,.08);
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+      margin-top:8px;
+    }
+    .plannerOutput .planTable th,
+    .plannerOutput .planTable td{
+      padding:8px 9px;
+      text-align:right;
+      font-size:12.2px;
+      border-bottom:1px solid rgba(30,45,73,.08);
+      vertical-align:top;
+    }
+    .plannerOutput .planTable th{
+      background:#f6f9ff;
+      color:#51627f;
+      font-weight:800;
+    }
+    .plannerOutput .planTable tr:last-child td{ border-bottom:0; }
+    .plannerOutput .planTable td:first-child{
+      white-space:nowrap;
+      font-weight:800;
+      color:#21324f;
+      width:96px;
+    }
+    
+    
+    /* Actions column: keep buttons fully visible on mobile */
+    .table th.actionsCol,
+    .table td.actionsCol{
+      min-width: 132px;
+      width: 132px;
+      text-align: center;
+    }
+    .rowActions{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      flex-wrap:nowrap;
+      width:100%;
+    }
+    .rowActions button{
+      min-width:58px;
+      height:38px;
+      padding:7px 10px;
+      border-radius:12px !important;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      line-height:1;
+      white-space:nowrap;
+      margin:0 !important;
+      flex:0 0 auto;
+      font-size:12px;
+      font-weight:800;
+    }
+    @media (max-width:520px){
+      .table th.actionsCol,
+      .table td.actionsCol{
+        min-width: 118px !important;
+        width: 118px !important;
+      }
+      .rowActions{
+        flex-direction:column;
+        align-items:stretch;
+        gap:6px;
+      }
+      .rowActions button{
+        width:100%;
+        min-width:0;
+        height:36px;
+        padding:6px 8px;
+        font-size:11.5px;
+      }
+    }
+
+
+
+    .logCardsShell{
+      margin-top:10px;
+      padding:0;
+      border:0;
+      background:transparent;
+      line-height:1.65;
+    }
+    .logCardsShell .logEmpty{
+      border:1px dashed rgba(30,45,73,.14);
+      border-radius:14px;
+      padding:16px 14px;
+      background:#ffffff;
+      text-align:center;
+      color:#5c6b84;
+      font-size:12.5px;
+      font-weight:700;
+    }
+    .logCardsShell .logDayCard{
+      border:1px solid rgba(30,45,73,.08);
+      border-radius:18px;
+      padding:14px;
+      background:#ffffff;
+      margin-top:12px;
+      box-shadow:0 10px 26px rgba(15,27,24,.05);
+    }
+    .logCardsShell .logDayCard:first-child{ margin-top:0; }
+    .logCardsShell .logHead{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .logCardsShell .logHeadTitle{
+      margin:0;
+      font-family:"Alexandria", var(--font);
+      font-size:14px;
+      color:#17243a;
+    }
+    .logCardsShell .logHeadMeta{
+      color:#6b7a94;
+      font-size:12px;
+      margin-top:4px;
+      font-weight:700;
+    }
+    .logCardsShell .logHint{
+      margin-top:6px;
+      color:#7a879d;
+      font-size:11.8px;
+      font-weight:700;
+    }
+    .logCardsShell .logTableWrap{ overflow:auto; }
+    .logCardsShell .logTableNice{
+      width:100%;
+      min-width:620px;
+      border-collapse:separate;
+      border-spacing:0;
+      border:1px solid rgba(30,45,73,.08);
+      border-radius:14px;
+      overflow:hidden;
+      background:#ffffff;
+    }
+    .logCardsShell .logTableNice th,
+    .logCardsShell .logTableNice td{
+      padding:10px 10px;
+      text-align:right;
+      font-size:12.3px;
+      border-bottom:1px solid rgba(30,45,73,.08);
+      vertical-align:top;
+      color:#1f2d47;
+    }
+    .logCardsShell .logTableNice th{
+      background:#f6f9ff;
+      color:#51627f;
+      font-weight:800;
+    }
+    .logCardsShell .logTableNice tr:last-child td{ border-bottom:0; }
+    .logCardsShell .logTableNice td.sectionCol{
+      width:100px;
+      white-space:nowrap;
+      font-weight:800;
+      color:#21324f;
+    }
+    .logCardsShell .exerciseName{
+      font-weight:800;
+      color:#1c2943;
+    }
+    .logCardsShell .exerciseMeta{
+      display:block;
+      margin-top:4px;
+      color:#6c7b95;
+      font-size:11.5px;
+      font-weight:700;
+      line-height:1.55;
+    }
+    .logCardsShell .doseMain{
+      font-weight:800;
+      color:#1c2943;
+      white-space:nowrap;
+    }
+    .logCardsShell .doseSub{
+      display:block;
+      margin-top:4px;
+      color:#6c7b95;
+      font-size:11.4px;
+      font-weight:700;
+      line-height:1.45;
+    }
+    .logCardsShell .actionsIconCol{
+      width:92px;
+      min-width:92px;
+      text-align:center;
+    }
+    .iconActions{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .iconBtn{
+      width:36px;
+      height:36px;
+      min-width:36px;
+      padding:0;
+      border-radius:11px;
+      border:1px solid rgba(30,45,73,.10);
+      background:#ffffff;
+      box-shadow:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:15px;
+      line-height:1;
+      font-weight:900;
+      color:#21324f;
+    }
+    .iconBtn.edit{
+      color:#2d63d8;
+      background:rgba(45,99,216,.07);
+      border-color:rgba(45,99,216,.18);
+    }
+    .iconBtn.delete{
+      color:#d94b63;
+      background:rgba(217,75,99,.08);
+      border-color:rgba(217,75,99,.18);
+    }
+    .iconBtn:hover{
+      transform:translateY(-1px);
+      box-shadow:0 8px 18px rgba(18,32,29,.08);
+    }
+    @media (max-width:520px){
+      .logCardsShell .logDayCard{ padding:12px; }
+      .logCardsShell .logTableNice{ min-width:560px; }
+      .iconBtn{ width:34px; height:34px; min-width:34px; }
+    }
+
+#btnCancelEdit{ border-color: rgba(255,170,0,.35); }
+    @media (max-width:860px){
+      .plannerChecks{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width:480px){
+      .plannerChecks{ grid-template-columns:1fr; }
+    }
+
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>تطبيق اللياقة الشخصي</h1>
+      <p class="sub">تابع سعراتك، بروتينك وتمارينك بسهولة — كل شيء في مكان واحد ✅</p>
+      <div class="topUserBar" id="userBar" hidden>
+        <span class="pill identityPill" id="userIdentityPill">
+          <span class="avatar" id="userAvatar"><span id="userAvatarText">؟</span><img id="userAvatarImg" alt="" hidden /></span>
+          <span id="userNameText">غير مسجل</span>
+        </span>
+        <div class="btns topUserBtns">
+          <button class="secondary" id="btnAccount" type="button">إعدادات الحساب</button>
+          <button class="secondary" id="btnEditProfile" type="button">تعديل الملف الشخصي</button>
+          <button class="secondary" id="btnLogout" type="button">تسجيل الخروج</button>
+        </div>
+      </div>
+
+          </div>
+  </header>
+
+  
+  <section class="wrap" id="authPanel">
+    <section class="card authCard">
+      <div class="hd">
+        <h2>تسجيل الدخول / إنشاء حساب</h2>
+        <span class="pill">Firebase</span>
+      </div>
+      <div class="bd">
+        <div class="row2">
+          <div>
+            <label>البريد الإلكتروني</label>
+            <input id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" />
+          </div>
+          <div>
+            <label>كلمة المرور</label>
+            <input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••" />
+          </div>
+        </div>
+        <div class="btns authBtns">
+          <button id="btnLogin" type="button">تسجيل الدخول</button>
+          <button class="secondary" id="btnRegister" type="button">إنشاء حساب</button>
+          <button class="secondary" id="btnForgot" type="button">نسيت كلمة المرور</button>
+        </div>
+        <div class="hint">بعد أول دخول ستُحفظ بياناتك في Firebase، وعند الدخول من الهاتف أو الكمبيوتر ستظهر بياناتك تلقائياً.</div>
+        <div class="pill" id="authMsg" hidden></div>
+      </div>
+    </section>
+  </section>
+
+  <main id="appMain" class="wrap grid" hidden>
+    <section id="homeHub" hidden>
+      <div class="welcomeHero">
+        <h2 id="welcomeGreeting">مرحبًا 👋</h2>
+        <p id="welcomeSubtitle">تابع احتياجك وخطتك وتمارينك بسهولة.</p>
+      </div>
+      <div class="cardsGrid">
+        <article class="homeCard card-daily" data-open="daily">
+          <div class="icon" aria-hidden="true">🧮</div>
+          <h3>الاحتياج اليومي</h3>
+          <div class="desc">BMR و TDEE والسعرات والبروتين المقترح.</div>
+          <div class="quick" id="homeQuickDaily">احسب الآن</div>
+        </article>
+        <article class="homeCard card-diet" data-open="diet">
+          <div class="icon" aria-hidden="true">🥗</div>
+          <h3>الخطة الغذائية</h3>
+          <div class="desc">وجبات أسبوعية مقترحة حسب هدفك الحالي.</div>
+          <div class="quick" id="homeQuickDiet">ستظهر بعد الحساب</div>
+        </article>
+        <article class="homeCard card-workout" data-open="workout">
+          <div class="icon" aria-hidden="true">🏋️</div>
+          <h3>التمارين</h3>
+          <div class="desc">السجل، مكتبة التمارين، والبرنامج الأسبوعي.</div>
+          <div class="quick" id="homeQuickWorkout">0 سطر</div>
+        </article>
+      </div>
+    </section>
+
+    <section id="detailShell" hidden>
+      <div id="detailHeader">
+        <div id="detailTitle">التفاصيل</div>
+        <button class="secondary" id="detailBackBtn" type="button">← الرجوع للرئيسية</button>
+      </div>
+      <div id="detailViews"></div>
+    </section>
+
+    <section class="card">
+      <div class="hd">
+        <h2 id="profileCardTitle">١) بياناتك + الحسبة</h2>
+        <span class="pill" id="saveState">سجّل الدخول لتفعيل المزامنة</span>
+      </div>
+      <div class="bd">
+        <div id="profileFormSection">
+        <div class="row2">
+          <div>
+            <label>الاسم (اختياري)</label>
+            <input id="name" type="text" placeholder="مثال: ناز" />
+          </div>
+          <div>
+            <label>الجنس</label>
+            <select id="sex">
+              <option value="male">ذكر</option>
+              <option value="female">أنثى</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row2" style="margin-top:10px;">
+          <div>
+            <label>العمر (سنة)</label>
+            <input id="age" type="number" min="10" max="90" step="1" placeholder="مثال: 39" />
+          </div>
+          <div>
+            <label>الطول (سم)</label>
+            <input id="height" type="number" min="120" max="230" step="0.1" placeholder="مثال: 172" />
+          </div>
+        </div>
+
+        <div class="row2" style="margin-top:10px;">
+          <div>
+            <label>الوزن (كجم)</label>
+            <input id="weight" type="number" min="30" max="250" step="0.1" placeholder="مثال: 84" />
+          </div>
+          <div>
+            <label>مستوى النشاط اليومي</label>
+            <select id="activity">
+              <option value="1.2">قليل جداً (عمل مكتبي/بدون رياضة)</option>
+              <option value="1.375">خفيف (١–٣ أيام/أسبوع)</option>
+              <option value="1.55" selected>متوسط (٣–٥ أيام/أسبوع)</option>
+              <option value="1.725">عالي (٦–٧ أيام/أسبوع)</option>
+              <option value="1.9">عالي جداً (عمل شاق + تدريب)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row2" style="margin-top:10px;">
+          <div>
+            <label>الهدف</label>
+            <select id="goal">
+              <option value="cut">إنقاص وزن (Cut)</option>
+              <option value="recomp" selected>إعادة تركيب (Recomp)</option>
+              <option value="bulk">زيادة عضل (Lean Bulk)</option>
+              <option value="maintain">تثبيت وزن (Maintain)</option>
+            </select>
+          </div>
+          <div>
+            <label>العدّاء/الكارديو</label>
+            <select id="cardioPref">
+              <option value="none">لا أرغب بكارديو</option>
+              <option value="light" selected>خفيف</option>
+              <option value="moderate">متوسط</option>
+              <option value="high">عالي</option>
+            </select>
+          
+          
+</div>
+        </div>
+
+        <div class="btns">
+          <button id="calcBtn">احسب الآن</button>
+          <button class="secondary" id="saveBtn">حفظ البيانات</button>
+          <button class="danger" id="resetBtn">مسح كل البيانات</button>
+        </div>
+
+        <div class="hr"></div>
+
+        </div>
+
+        <div class="hint" id="profileLockHint" hidden>تم حفظ الملف الشخصي. يمكنك تعديل بياناتك لاحقاً من زر "تعديل الملف الشخصي".</div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="t">BMR (حرق الراحة)</div>
+            <div class="v" id="bmrOut">—</div>
+            <div class="s">يعتمد على معادلة Mifflin–St Jeor.</div>
+          </div>
+          <div class="kpi">
+            <div class="t">TDEE (الاحتياج اليومي)</div>
+            <div class="v" id="tdeeOut">—</div>
+            <div class="s">BMR × مستوى النشاط.</div>
+          </div>
+          <div class="kpi">
+            <div class="t">السعرات المقترحة للهدف</div>
+            <div class="v" id="calOut">—</div>
+            <div class="s" id="calNote">—</div>
+          </div>
+          <div class="kpi">
+            <div class="t">البروتين المقترح</div>
+            <div class="v" id="proOut">—</div>
+            <div class="s" id="proNote">—</div>
+          </div>
+          <div class="kpi kpi-soft-blue">
+            <div class="t">الوزن الحالي</div>
+            <div class="v" id="weightOut">—</div>
+            <div class="s" id="weightNote">أدخل الوزن لعرض التفاصيل.</div>
+          </div>
+          <div class="kpi kpi-soft-green">
+            <div class="t">الطول + BMI</div>
+            <div class="v" id="bmiOut">—</div>
+            <div class="s" id="bmiNote">أدخل الطول والوزن لحساب BMI.</div>
+          </div>
+          <div class="kpi kpi-soft-peach">
+            <div class="t">الطول الحالي</div>
+            <div class="v" id="heightOut">—</div>
+            <div class="s" id="heightNote">سيظهر الطول بالسنتيمتر.</div>
+          </div>
+          <div class="kpi kpi-soft-violet">
+            <div class="t">الوزن المقترح (تقريبي)</div>
+            <div class="v" id="weightTargetOut">—</div>
+            <div class="s" id="weightTargetNote">يعتمد على BMI الصحي.</div>
+          </div>
+        </div>
+
+      </div>
+      <div class="footer">
+
+        <div class="muted">الخطة الغذائية الأسبوعية (7 أيام) — حسب التارجت الذي يحسبه التطبيق:</div>
+        <div class="kpi" style="margin-top:10px;">
+          <div class="t">الخطة تظهر تلقائياً بعد الضغط على "احسب الآن"</div>
+          <div class="s" id="mealPlanOut">أدخل بياناتك ثم اضغط "احسب الآن".</div>
+        </div>
+      
+
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="hd">
+        <h2>٢) جدول التمارين + مكتبة التمارين</h2>
+        <div class="tabs" id="tabs">
+          <div class="tab active" data-tab="log">السجل</div>
+          <div class="tab" data-tab="plan">البرنامج الأسبوعي</div>
+          <div class="tab" data-tab="library">مكتبة التمارين</div>
+          <div class="tab" data-tab="tips">نصائح</div>
+        </div>
+      </div>
+
+      <div class="bd">
+        <div id="tab-log">
+          <div class="row2">
+            <div>
+              <label>المجموعة العضلية</label>
+              <select id="daySelect">
+                <option value="chest" selected>صدر</option>
+                <option value="triceps">تراي</option>
+                <option value="shoulders">أكتاف</option>
+                <option value="core">معدة</option>
+                <option value="back">ظهري</option>
+                <option value="biceps">باي</option>
+                <option value="legs">رجول</option>
+                <option value="cardio">كارديو</option>
+</select>
+            </div>
+            <div>
+              <label>التاريخ</label>
+              <input id="dateInput" type="date" />
+            </div>
+          </div>
+
+          <div class="row2" style="margin-top:10px;">
+            <div>
+              <label>التمرين</label>
+              <select id="exerciseSelect"></select>
+            </div>
+            <div>
+              <label>ملاحظة (اختياري)</label>
+              <input id="noteInput" type="text" placeholder="مثال: RPE 8 / تقنية بطيئة" />
+            </div>
+          </div>
+
+          <div class="row2" style="margin-top:10px;">
+            <div>
+              <label id="repsLabel">العدّات (Reps)</label>
+              <input id="repsInput" type="text" inputmode="numeric" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9,،\s]/g,\'\')" placeholder="مثال: 12,10,8 أو 12 10 8" />
+            </div>
+            <div>
+              <label id="loadLabel">الوزن (كجم)</label>
+              <input id="loadInput" type="text" inputmode="decimal" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9,،\.\s]/g,\'\')" placeholder="مثال: 40,45,50 أو 40 45 50" />
+            </div>
+          </div>
+
+          <div class="btns">
+            <button id="addSetBtn">إضافة للسجل</button>
+            <button class="secondary" id="btnCancelEdit" type="button" hidden>إلغاء التعديل</button>
+            <button class="secondary" id="btnPlannerModal" type="button">🗓️ اقترح لي جدول تمرين</button>
+            <button class="secondary" id="exportBtn">تصدير CSV</button>
+            <button class="danger" id="clearLogBtn">مسح السجل</button>
+          </div>
+
+          <div class="split">
+            <div class="badge" id="logCount">0 سطر</div>
+            <div class="badge" id="sortState">ترتيب: الأحدث أولاً</div>
+          </div>
+
+          <div class="logCardsShell plannerOutput" id="logCards"></div>
+
+  
+        </div>
+
+        <div id="tab-plan" style="display:none;">
+          <div class="kpi" style="margin-bottom:10px;">
+            <div class="t">مقترحات (اختياري) — أنت تختار جدولك</div>
+            <div class="s">
+              <ul style="margin:8px 0 0; padding-right:18px;">
+                <li><b>اليوم 1:</b> صدر + تراي</li>
+                <li><b>اليوم 2:</b> أكتاف + معدة + سواعد</li>
+                <li><b>اليوم 3:</b> ظهر + باي</li>
+                <li><b>اليوم 4:</b> رجل</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="kpi">
+              <div class="t">اقتراح حجم التمرين</div>
+              <div class="s">
+                <ul style="margin:8px 0 0; padding-right:18px;">
+                  <li>كل عضلة كبيرة: 10–16 مجموعة/أسبوع (حسب خبرتك وتعافيك)</li>
+                  <li>عضلات صغيرة: 6–10 مجموعات/أسبوع</li>
+                  <li>كرر 6–12 عدة لمعظم التمارين (قوة: 3–6 / تضخيم: 6–12 / عزل: 10–20)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="kpi">
+              <div class="t">Progressive Overload</div>
+              <div class="s">
+                <ul style="margin:8px 0 0; padding-right:18px;">
+                  <li>إذا وصلت للحد الأعلى للعدّات بنفس التقنية: زِد الوزن 2.5–5%</li>
+                  <li>أو زِد 1–2 عدة قبل زيادة الوزن</li>
+                  <li>حافظ على RPE 7–9 لمعظم المجموعات</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="hint" style="margin-top:10px;">
+            يمكنك تعديل مكتبة التمارين داخل الملف (قسم <span class="muted">EXERCISES</span>) لإضافة تمارينك الخاصة.
+          </div>
+        </div>
+
+        <div id="tab-library" style="display:none;">
+          <div class="row2">
+            <div>
+              <label>بحث</label>
+              <input id="libSearch" type="text" placeholder="اكتب اسم تمرين أو عضلة..." />
+            </div>
+            <div>
+              <label>تصفية حسب التقسيمة</label>
+              <select id="libSplitFilter">
+                <option value="all" selected>الكل</option>
+                <option value="chest">صدر</option>
+                <option value="triceps">تراي</option>
+                <option value="shoulders">أكتاف</option>
+                <option value="core">معدة</option>
+                <option value="back">ظهري</option>
+                <option value="biceps">باي</option>
+                <option value="legs">رجول</option>
+                <option value="cardio">كارديو</option>
+</select>
+            </div>
+          </div>
+
+          <div style="margin-top:10px; overflow:auto;">
+            <table class="table" id="libTable">
+              <thead>
+                <tr>
+                  <th>التمرين</th>
+                  <th>العضلة المستهدفة</th>
+                  <th>تقسيمة</th>
+                  <th>تكنيك مختصر</th>
+                  <th>فيديو</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="hint">
+            روابط الفيديو عبارة عن بحث جاهز في يوتيوب باسم التمرين (يمكنك استبدالها بروابط محددة).
+          </div>
+        </div>
+
+        <div id="tab-tips" style="display:none;">
+          <div class="row2">
+            <div class="kpi">
+              <div class="t">الكارديو: متى وكيف؟</div>
+              <div class="s" id="cardioAdvice">—</div>
+            </div>
+            <div class="kpi">
+              <div class="t">اقتراحات أكل سريعة</div>
+              <div class="s" id="foodAdvice">—</div>
+            </div>
+          </div>
+
+          <div class="kpi" style="margin-top:10px;">
+            <div class="t">تقنية التمرين (مختصر)</div>
+            <div class="s">
+              <ul style="margin:8px 0 0; padding-right:18px;">
+                <li><b>المدى الحركي:</b> كامل قدر الإمكان بدون ألم.</li>
+                <li><b>التحكم:</b> نزول بطيء 2–3 ثواني، صعود قوي.</li>
+                <li><b>التنفس:</b> شهيق في النزول، زفير في الصعود.</li>
+                <li><b>الأمان:</b> توقف إذا ظهر ألم حاد أو دوخة. استخدم Spotter في البنش/السكوات.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="kpi" style="margin-top:10px;">
+            <div class="t">كيف تتقدم بسرعة بدون إصابات؟</div>
+            <div class="s">
+              <ul style="margin:8px 0 0; padding-right:18px;">
+                <li>سخّن 5–8 دقائق + مجموعات تمهيدية خفيفة قبل الوزن الثقيل.</li>
+                <li>النوم 7–9 ساعات، وخفّف الحجم إذا تعبت أو قل النوم.</li>
+                <li>لا تُكمل كل المجموعات للفشل؛ اجعل 1–2 مجموعة فقط قرب الفشل.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+    </section>
+  </main>
+
+
+  <div class="modal" id="accountModal" hidden>
+    <section class="card modalCard">
+      <div class="hd">
+        <h2>إعدادات الحساب</h2>
+        <button class="modalClose" id="btnCloseAccount" type="button">إغلاق</button>
+      </div>
+      <div class="bd">
+        <div class="row2">
+          <div>
+            <label>الاسم الظاهر (Display Name)</label>
+            <input id="accDisplayName" type="text" placeholder="مثال: أبو جمال" />
+          </div>
+          <div>
+            <label>رابط صورة (اختياري)</label>
+            <input id="accPhotoUrl" type="url" inputmode="url" placeholder="https://..." />
+          </div>
+        </div>
+
+        <div class="btns">
+          <button id="btnSaveAccount" type="button">حفظ بيانات الحساب</button>
+          <button class="secondary" id="btnVerifyEmail" type="button">تأكيد البريد الإلكتروني</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row2">
+          <div>
+            <label>كلمة المرور الحالية</label>
+            <input id="accCurrentPass" type="password" autocomplete="current-password" placeholder="••••••••" />
+          </div>
+          <div>
+            <label>كلمة مرور جديدة</label>
+            <input id="accNewPass" type="password" autocomplete="new-password" placeholder="••••••••" />
+          </div>
+        </div>
+
+        <div class="btns">
+          <button class="secondary" id="btnChangePassword" type="button">تغيير كلمة المرور</button>
+          <button class="secondary" id="btnResetPasswordEmail" type="button">إرسال رابط إعادة تعيين</button>
+        </div>
+
+        <div class="pill" id="accountMsg" hidden></div>
+        <div class="hint">ملاحظة: تغيير كلمة المرور قد يتطلب تسجيل دخول حديث. إذا ظهر تنبيه “أعد تسجيل الدخول”، سجّل خروج ثم ادخل مرة أخرى وحاول.</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal" id="plannerModal" hidden>
+    <section class="card modalCard plannerModalCard">
+      <div class="hd">
+        <h2>اقتراح جدول تمرين</h2>
+        <button class="modalClose" id="btnClosePlanner" type="button">إغلاق</button>
+      </div>
+      <div class="bd">
+        <div class="hint" style="margin-bottom:10px;">
+          اختر عدد أيام التمرين، وسيقترح التطبيق تقسيمة تدريب يومية على شكل <b>اليوم 1 / اليوم 2 / اليوم 3</b>. اختيار العضلات يبقى <b>اختياريًا</b> فقط لتحديد التركيز.
+        </div>
+
+        <div class="plannerBox">
+          <div class="plannerRowTop">
+            <label class="plannerAllToggle">
+              <input type="checkbox" id="plannerAllMuscles" checked />
+              <span>كل العضلات</span>
+            </label>
+            <span class="badge" id="plannerSelectedCount">8 عضلات</span>
+          </div>
+
+          <div class="plannerChecks" id="plannerChecks">
+            <label><input type="checkbox" class="plannerMuscle" value="chest" checked /> صدر</label>
+            <label><input type="checkbox" class="plannerMuscle" value="triceps" checked /> تراي</label>
+            <label><input type="checkbox" class="plannerMuscle" value="shoulders" checked /> أكتاف</label>
+            <label><input type="checkbox" class="plannerMuscle" value="core" checked /> معدة</label>
+            <label><input type="checkbox" class="plannerMuscle" value="back" checked /> ظهري</label>
+            <label><input type="checkbox" class="plannerMuscle" value="biceps" checked /> باي</label>
+            <label><input type="checkbox" class="plannerMuscle" value="legs" checked /> رجول</label>
+            <label><input type="checkbox" class="plannerMuscle" value="cardio" checked /> كارديو</label>
+          </div>
+
+          <div class="row2" style="margin-top:10px;">
+            <div>
+              <label>نوع الخطة</label>
+              <select id="plannerPeriod">
+                <option value="daily">خطة يومية</option>
+                <option value="weekly" selected>خطة أسبوعية</option>
+                <option value="monthly">خطة شهرية (4 أسابيع)</option>
+              </select>
+            </div>
+            <div>
+              <label>عدد أيام التمرين بالأسبوع</label>
+              <select id="plannerDaysPerWeek">
+                <option value="2">2 أيام</option>
+                <option value="3">3 أيام</option>
+                <option value="4" selected>4 أيام</option>
+                <option value="5">5 أيام</option>
+                <option value="6">6 أيام</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row2" style="margin-top:10px;">
+            <div>
+              <label>هدف الخطة</label>
+              <select id="plannerGoalStyle">
+                <option value="hypertrophy" selected>تضخيم / بناء عضل</option>
+                <option value="fatloss">تنشيف / حرق دهون</option>
+                <option value="general">لياقة عامة</option>
+              </select>
+            </div>
+            <div>
+              <label>المستوى</label>
+              <select id="plannerLevel">
+                <option value="beginner" selected>مبتدئ</option>
+                <option value="intermediate">متوسط</option>
+                <option value="advanced">متقدم</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="btns" style="margin-top:12px;">
+            <button id="btnGeneratePlanner" type="button">إنشاء الجدول</button>
+            <button class="secondary" id="btnAddPlannerToLog" type="button">➕ أضف الجدول لتماريني</button>
+            <button class="secondary" id="btnCopyPlanner" type="button">نسخ الجدول</button>
+          </div>
+
+          <div class="plannerOutput" id="plannerOutput">
+            اضغط <b>إنشاء الجدول</b> لتظهر الخطة هنا.
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence, sendPasswordResetEmail, sendEmailVerification, updateProfile, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyACO9JC1Bj0mexLHgi0l3lDJIOYUizWaEI",
+      authDomain: "hse-calendar-3eb45.firebaseapp.com",
+      projectId: "hse-calendar-3eb45",
+      storageBucket: "hse-calendar-3eb45.firebasestorage.app",
+      messagingSenderId: "1047298015875",
+      appId: "1:1047298015875:web:c8ae004f85eba074a991b6",
+      measurementId: "G-ZRYK11SNX4"
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const fmt = (n) => Number.isFinite(n) ? Math.round(n) : "—";
+    const todayISO = () => new Date().toISOString().slice(0,10);
+
+    const EXERCISES = [
+      // صدر (Chest)
+      {id:"bench_press", name:"بنش برس بار (Barbell Bench Press)", target:"صدر + تراي", split:"chest", cue:"ثبت لوح الكتف للخلف، لمس خفيف، ادفع عمودياً.", yt:"https://www.youtube.com/results?search_query=Barbell+Bench+Press+proper+form"},
+      {id:"incline_bench", name:"بنش مائل بار (Incline Bench Press)", target:"صدر علوي + كتف أمامي", split:"chest", cue:"زاوية 20–30°، تحكم بالنزول.", yt:"https://www.youtube.com/results?search_query=Incline+Bench+Press+proper+form"},
+      {id:"decline_bench", name:"بنش ديكلان بار (Decline Bench Press)", target:"صدر سفلي", split:"chest", cue:"مدى كامل بدون ضغط كتف.", yt:"https://www.youtube.com/results?search_query=Decline+Bench+Press+proper+form"},
+      {id:"db_bench", name:"بنش دمبل مستوي (DB Bench Press)", target:"صدر", split:"chest", cue:"نزول متحكم، لا تصدم الدمبل.", yt:"https://www.youtube.com/results?search_query=Dumbbell+Bench+Press+proper+form"},
+      {id:"incline_db", name:"بنش مائل دمبل (Incline DB Press)", target:"صدر علوي", split:"chest", cue:"زاوية 20–30°، لا ترفع الكتف.", yt:"https://www.youtube.com/results?search_query=Incline+Dumbbell+Press+proper+form"},
+      {id:"machine_chest_press", name:"جهاز ضغط صدر (Machine Chest Press)", target:"صدر", split:"chest", cue:"ثبت الظهر، ادفع للأمام بدون قفل.", yt:"https://www.youtube.com/results?search_query=Machine+Chest+Press+proper+form"},
+      {id:"smith_incline", name:"سميث مائل (Smith Incline Press)", target:"صدر علوي", split:"chest", cue:"مسار ثابت، تحكم.", yt:"https://www.youtube.com/results?search_query=Smith+Machine+Incline+Press+proper+form"},
+      {id:"cable_fly", name:"فلاي كيبل (Cable Fly)", target:"صدر (عزل)", split:"chest", cue:"اعصر الصدر في المنتصف.", yt:"https://www.youtube.com/results?search_query=Cable+Fly+proper+form"},
+      {id:"pec_deck", name:"بيك ديك (Pec Deck)", target:"صدر (عزل)", split:"chest", cue:"مرفق ثابت، اعصر بالأعلى.", yt:"https://www.youtube.com/results?search_query=Pec+Deck+proper+form"},
+      {id:"pushup", name:"بوش أب (Push-up)", target:"صدر + تراي", split:"chest", cue:"جسم مستقيم، مدى كامل.", yt:"https://www.youtube.com/results?search_query=Push+up+proper+form"},
+      {id:"dip_chest", name:"ديبس للصدر (Chest Dips)", target:"صدر سفلي + تراي", split:"chest", cue:"ميل للأمام للصدر.", yt:"https://www.youtube.com/results?search_query=Chest+Dips+proper+form"},
+
+      // تراي (Triceps)
+      {id:"triceps_pushdown", name:"تراي كيبل (Triceps Pushdown)", target:"تراي", split:"triceps", cue:"ثبت الكوع، اعصر بالأسفل.", yt:"https://www.youtube.com/results?search_query=Triceps+Pushdown+proper+form"},
+      {id:"rope_pushdown", name:"تراي حبل (Rope Pushdown)", target:"تراي", split:"triceps", cue:"افتح الحبل بالأسفل.", yt:"https://www.youtube.com/results?search_query=Rope+Triceps+Pushdown+proper+form"},
+      {id:"overhead_triceps", name:"تراي فوق الرأس (Overhead Extension)", target:"الرأس الطويل", split:"triceps", cue:"المرفق ثابت للأعلى.", yt:"https://www.youtube.com/results?search_query=Overhead+Triceps+Extension+proper+form"},
+      {id:"skull_crusher", name:"سكُل كراشر (Skull Crushers)", target:"تراي", split:"triceps", cue:"لا تفتح المرفق كثيراً.", yt:"https://www.youtube.com/results?search_query=Skull+Crushers+proper+form"},
+      {id:"close_grip_bench", name:"بنش قبضة ضيقة (Close Grip Bench)", target:"تراي + صدر", split:"triceps", cue:"كوع قريب للجسم.", yt:"https://www.youtube.com/results?search_query=Close+Grip+Bench+Press+proper+form"},
+      {id:"bench_dip", name:"ديبس كرسي (Bench Dips)", target:"تراي", split:"triceps", cue:"لا تذهب لمدى يوجع الكتف.", yt:"https://www.youtube.com/results?search_query=Bench+Dips+proper+form"},
+      {id:"triceps_kickback", name:"ركلة دمبل (Triceps Kickback)", target:"تراي (عزل)", split:"triceps", cue:"ثبّت الذراع، مدّ للخلف.", yt:"https://www.youtube.com/results?search_query=Triceps+Kickback+proper+form"},
+
+      // أكتاف (Shoulders)
+      {id:"ohp", name:"كتف بار واقف (Overhead Press)", target:"أكتاف + تراي", split:"shoulders", cue:"شد البطن، لا تقوس الظهر.", yt:"https://www.youtube.com/results?search_query=Overhead+Press+proper+form"},
+      {id:"seated_db_press", name:"كتف دمبل جالس (Seated DB Press)", target:"أكتاف", split:"shoulders", cue:"مدى متحكم، لا تدفع الرقبة للأمام.", yt:"https://www.youtube.com/results?search_query=Seated+Dumbbell+Shoulder+Press+proper+form"},
+      {id:"arnold_press", name:"أرنولد برس (Arnold Press)", target:"أكتاف", split:"shoulders", cue:"حركة سلسة بدون زخم.", yt:"https://www.youtube.com/results?search_query=Arnold+Press+proper+form"},
+      {id:"lateral_raise", name:"رفرفة جانبية (Lateral Raise)", target:"كتف جانبي", split:"shoulders", cue:"مرفق أعلى قليلاً من اليد.", yt:"https://www.youtube.com/results?search_query=Lateral+Raise+proper+form"},
+      {id:"cable_lateral", name:"رفرفة كيبل (Cable Lateral Raise)", target:"كتف جانبي", split:"shoulders", cue:"ثبات أعلى، شد مستمر.", yt:"https://www.youtube.com/results?search_query=Cable+Lateral+Raise+proper+form"},
+      {id:"rear_delt_fly", name:"رفرفة خلفية (Rear Delt Fly)", target:"كتف خلفي", split:"shoulders", cue:"لا ترفع الترابيس.", yt:"https://www.youtube.com/results?search_query=Rear+Delt+Fly+proper+form"},
+      {id:"face_pull", name:"فيس بول (Face Pull)", target:"كتف خلفي + ترابيس", split:"shoulders", cue:"اسحب للوجه مع دوران خارجي.", yt:"https://www.youtube.com/results?search_query=Face+Pull+proper+form"},
+      {id:"upright_row", name:"سحب عمودي (Upright Row)", target:"كتف/ترابيس", split:"shoulders", cue:"وزن خفيف، مدى مريح للكتف.", yt:"https://www.youtube.com/results?search_query=Upright+Row+proper+form"},
+      {id:"shrug", name:"شراگ (Shrugs)", target:"ترابيس", split:"shoulders", cue:"ارفع للأعلى، توقف.", yt:"https://www.youtube.com/results?search_query=Shrugs+proper+form"},
+
+      // معدة (Core)
+      {id:"plank", name:"بلانك (Plank)", target:"كور", split:"core", cue:"حوض محايد، شد البطن.", yt:"https://www.youtube.com/results?search_query=Plank+proper+form"},
+      {id:"side_plank", name:"سايد بلانك (Side Plank)", target:"كور/جانبي", split:"core", cue:"خط مستقيم، لا تهبط.", yt:"https://www.youtube.com/results?search_query=Side+Plank+proper+form"},
+      {id:"hanging_leg_raise", name:"رفع أرجل تعليق (Hanging Leg Raise)", target:"معدة سفلية", split:"core", cue:"بدون تأرجح.", yt:"https://www.youtube.com/results?search_query=Hanging+Leg+Raise+proper+form"},
+      {id:"cable_crunch", name:"كرنش كيبل (Cable Crunch)", target:"معدة", split:"core", cue:"قوس العمود للأمام بتحكم.", yt:"https://www.youtube.com/results?search_query=Cable+Crunch+proper+form"},
+      {id:"ab_wheel", name:"عجلة البطن (Ab Wheel)", target:"كور", split:"core", cue:"تحكم، لا تترك أسفل الظهر.", yt:"https://www.youtube.com/results?search_query=Ab+Wheel+Rollout+proper+form"},
+      {id:"dead_bug", name:"ديد بَغ (Dead Bug)", target:"كور", split:"core", cue:"ظهر ملاصق للأرض.", yt:"https://www.youtube.com/results?search_query=Dead+Bug+exercise+proper+form"},
+      {id:"russian_twist", name:"روشن تويست (Russian Twist)", target:"مائل/كور", split:"core", cue:"حركة من الجذع، وزن مناسب.", yt:"https://www.youtube.com/results?search_query=Russian+Twist+proper+form"},
+
+      // ظهري (Back)
+      {id:"deadlift", name:"ديدلفت (Deadlift)", target:"ظهر + رجل خلفية", split:"back", cue:"ظهر محايد، بار قريب.", yt:"https://www.youtube.com/results?search_query=Deadlift+proper+form"},
+      {id:"pullup", name:"عقلة (Pull-up)", target:"لاتس + باي", split:"back", cue:"مدى كامل بدون رمي.", yt:"https://www.youtube.com/results?search_query=Pull+up+proper+form"},
+      {id:"chinup", name:"شن أب (Chin-up)", target:"لاتس + باي", split:"back", cue:"قبضة معكوسة.", yt:"https://www.youtube.com/results?search_query=Chin+up+proper+form"},
+      {id:"lat_pulldown", name:"سحب أمامي (Lat Pulldown)", target:"لاتس", split:"back", cue:"اسحب بالكوع.", yt:"https://www.youtube.com/results?search_query=Lat+Pulldown+proper+form"},
+      {id:"barbell_row", name:"رو بار (Barbell Row)", target:"منتصف الظهر", split:"back", cue:"ميل ثابت، اسحب للكوع.", yt:"https://www.youtube.com/results?search_query=Barbell+Row+proper+form"},
+      {id:"db_row", name:"سحب دمبل (One-Arm DB Row)", target:"لاتس/منتصف الظهر", split:"back", cue:"اسحب للكوع للخلف.", yt:"https://www.youtube.com/results?search_query=One+Arm+Dumbbell+Row+proper+form"},
+      {id:"seated_row", name:"رو كيبل (Seated Cable Row)", target:"منتصف الظهر", split:"back", cue:"كتف للأسفل.", yt:"https://www.youtube.com/results?search_query=Seated+Cable+Row+proper+form"},
+      {id:"tbar_row", name:"تي بار رو (T-Bar Row)", target:"منتصف الظهر", split:"back", cue:"تحكم، لا تتأرجح.", yt:"https://www.youtube.com/results?search_query=T+Bar+Row+proper+form"},
+      {id:"back_extension", name:"هايبر اكستنشن (Back Extension)", target:"أسفل الظهر", split:"back", cue:"لا تفرط بالتمدد.", yt:"https://www.youtube.com/results?search_query=Back+Extension+proper+form"},
+      {id:"straight_arm_pulldown", name:"سحب ذراع مستقيم (Straight-Arm Pulldown)", target:"لاتس", split:"back", cue:"ذراع شبه ثابت.", yt:"https://www.youtube.com/results?search_query=Straight+Arm+Pulldown+proper+form"},
+
+      // باي (Biceps)
+      {id:"db_curl", name:"باي دمبل (DB Curl)", target:"باي", split:"biceps", cue:"ثبت الكوع.", yt:"https://www.youtube.com/results?search_query=Dumbbell+Curl+proper+form"},
+      {id:"barbell_curl", name:"باي بار (Barbell Curl)", target:"باي", split:"biceps", cue:"بدون زخم.", yt:"https://www.youtube.com/results?search_query=Barbell+Curl+proper+form"},
+      {id:"hammer_curl", name:"هامر (Hammer Curl)", target:"براكيالس", split:"biceps", cue:"قبضة محايدة.", yt:"https://www.youtube.com/results?search_query=Hammer+Curl+proper+form"},
+      {id:"incline_db_curl", name:"باي مائل (Incline DB Curl)", target:"باي", split:"biceps", cue:"مدى كامل.", yt:"https://www.youtube.com/results?search_query=Incline+Dumbbell+Curl+proper+form"},
+      {id:"preacher_curl", name:"بريشر (Preacher Curl)", target:"باي", split:"biceps", cue:"نزول متحكم.", yt:"https://www.youtube.com/results?search_query=Preacher+Curl+proper+form"},
+      {id:"cable_curl", name:"باي كيبل (Cable Curl)", target:"باي", split:"biceps", cue:"شد ثابت.", yt:"https://www.youtube.com/results?search_query=Cable+Biceps+Curl+proper+form"},
+      {id:"concentration_curl", name:"كونسنتريشن (Concentration Curl)", target:"باي", split:"biceps", cue:"عزل كامل.", yt:"https://www.youtube.com/results?search_query=Concentration+Curl+proper+form"},
+
+      // رجول (Legs)
+      {id:"squat", name:"سكوات (Back Squat)", target:"كواد + كور", split:"legs", cue:"صدر للأعلى، ركبة مع القدم.", yt:"https://www.youtube.com/results?search_query=Back+Squat+proper+form"},
+      {id:"front_squat", name:"فرونت سكوات (Front Squat)", target:"كواد + كور", split:"legs", cue:"مرفق عالي، ظهر مستقيم.", yt:"https://www.youtube.com/results?search_query=Front+Squat+proper+form"},
+      {id:"leg_press", name:"ليج برس (Leg Press)", target:"كواد/أرداف", split:"legs", cue:"لا تقفل الركبة.", yt:"https://www.youtube.com/results?search_query=Leg+Press+proper+form"},
+      {id:"rdl", name:"رومانيان ديدلفت (RDL)", target:"هامسترنج", split:"legs", cue:"مفصل الورك للخلف.", yt:"https://www.youtube.com/results?search_query=Romanian+Deadlift+proper+form"},
+      {id:"hip_thrust", name:"هيب ثرست (Hip Thrust)", target:"أرداف", split:"legs", cue:"اعصر بالأعلى.", yt:"https://www.youtube.com/results?search_query=Hip+Thrust+proper+form"},
+      {id:"lunge", name:"لانجز (Lunge)", target:"كواد/أرداف", split:"legs", cue:"خطوة ثابتة.", yt:"https://www.youtube.com/results?search_query=Lunge+proper+form"},
+      {id:"bulgarian_split_squat", name:"بلغاريان (Bulgarian Split Squat)", target:"كواد/أرداف", split:"legs", cue:"ركبة متحكمة.", yt:"https://www.youtube.com/results?search_query=Bulgarian+Split+Squat+proper+form"},
+      {id:"leg_curl", name:"ليج كيرل (Leg Curl)", target:"هامسترنج", split:"legs", cue:"تحكم بالنزول.", yt:"https://www.youtube.com/results?search_query=Leg+Curl+proper+form"},
+      {id:"leg_extension", name:"ليج اكستنشن (Leg Extension)", target:"كواد", split:"legs", cue:"توقف بالأعلى.", yt:"https://www.youtube.com/results?search_query=Leg+Extension+proper+form"},
+      {id:"calf_raise", name:"سمانة (Calf Raise)", target:"سمانة", split:"legs", cue:"مدى كامل.", yt:"https://www.youtube.com/results?search_query=Calf+Raise+proper+form"},
+
+      // كارديو (Cardio)
+      {id:"treadmill_walk", name:"مشي سريع (Treadmill/Outdoor)", target:"قلب/حرق", split:"cardio", cue:"شدة Zone 2 (تقدر تتكلم بصعوبة بسيطة).", yt:"https://www.youtube.com/results?search_query=Zone+2+cardio+walk"},
+      {id:"treadmill_run", name:"جري (Running)", target:"قلب/حرق", split:"cardio", cue:"ابدأ تدريجياً لتجنب الإصابات.", yt:"https://www.youtube.com/results?search_query=Running+form+tips"},
+      {id:"cycling", name:"دراجة (Cycling)", target:"قلب/حرق", split:"cardio", cue:"ثبات وإيقاع مناسب.", yt:"https://www.youtube.com/results?search_query=Stationary+bike+workout"},
+      {id:"rowing", name:"تجديف (Rowing)", target:"قلب + ظهر", split:"cardio", cue:"تقنية: دفع رجل ثم سحب.", yt:"https://www.youtube.com/results?search_query=Rowing+machine+proper+form"},
+      {id:"elliptical", name:"إليبتكال (Elliptical)", target:"قلب/حرق", split:"cardio", cue:"شدة متوسطة مستمرة.", yt:"https://www.youtube.com/results?search_query=Elliptical+workout"},
+      {id:"stair_climber", name:"ستيرات/سلالم (Stair Climber)", target:"قلب + رجل", split:"cardio", cue:"وتيرة ثابتة.", yt:"https://www.youtube.com/results?search_query=Stair+climber+workout"},
+      {id:"jump_rope", name:"نط حبل (Jump Rope)", target:"قلب/حرق", split:"cardio", cue:"ابدأ 30–60ث جولات.", yt:"https://www.youtube.com/results?search_query=Jump+rope+workout"},
+      {id:"hiit_intervals", name:"HIIT فترات (Intervals)", target:"قلب/حرق", split:"cardio", cue:"مثال: 20ث سريع + 100ث بطيء × 8–12.", yt:"https://www.youtube.com/results?search_query=HIIT+intervals+workout"}
+    ];
+
+    const SPLIT_LABEL = {
+      chest: "صدر",
+      triceps: "تراي",
+      shoulders: "أكتاف",
+      core: "معدة",
+      back: "ظهري",
+      biceps: "باي",
+      legs: "رجول",
+      cardio: "كارديو"
+    };
+
+
+    const FOOD_CATEGORY_LABEL = {
+      protein: "مصادر البروتين",
+      carbs: "الكربوهيدرات",
+      dairy: "الألبان والبروتين السريع",
+      fruits: "الفواكه",
+      veggies: "الخضار والإضافات",
+      fats: "الدهون الصحية"
+    };
+
+    const FOOD_LIBRARY = [
+      {id:"tuna", name:"تونة بالماء", cat:"protein", serving:"100 جم", kcal:116, protein:26, tags:["meal","snack"]},
+      {id:"chicken_breast", name:"صدر دجاج", cat:"protein", serving:"100 جم", kcal:165, protein:31, tags:["meal"]},
+      {id:"lean_beef", name:"لحم قليل دهن", cat:"protein", serving:"100 جم", kcal:170, protein:26, tags:["meal"]},
+      {id:"fish", name:"سمك مشوي", cat:"protein", serving:"100 جم", kcal:128, protein:24, tags:["meal"]},
+      {id:"salmon", name:"سلمون", cat:"protein", serving:"100 جم", kcal:208, protein:20, tags:["meal","fat"]},
+      {id:"shrimp", name:"روبيان", cat:"protein", serving:"100 جم", kcal:99, protein:24, tags:["meal"]},
+      {id:"turkey", name:"تركي مدخن", cat:"protein", serving:"100 جم", kcal:135, protein:25, tags:["breakfast","snack"]},
+      {id:"boiled_eggs", name:"بيض مسلوق", cat:"protein", serving:"2 حبات", kcal:156, protein:12, tags:["breakfast","snack"]},
+      {id:"fried_eggs", name:"بيض مقلي", cat:"protein", serving:"2 حبات", kcal:180, protein:12, tags:["breakfast"]},
+      {id:"scrambled_eggs", name:"سكرامبلد إيغ", cat:"protein", serving:"2 حبات", kcal:170, protein:12, tags:["breakfast"]},
+      {id:"egg_whites", name:"بياض البيض", cat:"protein", serving:"4 بياض", kcal:68, protein:14, tags:["breakfast"]},
+      {id:"foul", name:"فول", cat:"protein", serving:"1 كوب", kcal:187, protein:13, tags:["breakfast","meal"]},
+      {id:"falafel_baked", name:"فلافل خفيفة", cat:"protein", serving:"3 حبات", kcal:170, protein:8, tags:["breakfast"]},
+      {id:"cottage_cheese_protein", name:"جبن قريش عالي البروتين", cat:"protein", serving:"100 جم", kcal:98, protein:11, tags:["breakfast","snack"]},
+
+      {id:"toast_bread", name:"خبز توست", cat:"carbs", serving:"2 شرائح", kcal:150, protein:6, tags:["breakfast","meal"]},
+      {id:"brown_toast", name:"خبز توست أسمر", cat:"carbs", serving:"2 شرائح", kcal:140, protein:7, tags:["breakfast","meal"]},
+      {id:"lebanese_bread", name:"خبز لبناني", cat:"carbs", serving:"1 رغيف صغير", kcal:165, protein:5, tags:["meal"]},
+      {id:"tortilla", name:"تورتيلا", cat:"carbs", serving:"1 حبة", kcal:140, protein:4, tags:["meal"]},
+      {id:"rice", name:"أرز", cat:"carbs", serving:"1 كوب مطبوخ", kcal:205, protein:4, tags:["meal"]},
+      {id:"brown_rice", name:"أرز بني", cat:"carbs", serving:"1 كوب مطبوخ", kcal:216, protein:5, tags:["meal"]},
+      {id:"oats", name:"شوفان", cat:"carbs", serving:"40 جم", kcal:150, protein:5, tags:["breakfast"]},
+      {id:"potato", name:"بطاطس", cat:"carbs", serving:"150 جم", kcal:130, protein:3, tags:["meal"]},
+      {id:"sweet_potato", name:"بطاطا حلوة", cat:"carbs", serving:"150 جم", kcal:135, protein:2, tags:["meal"]},
+      {id:"pasta", name:"مكرونة", cat:"carbs", serving:"1 كوب مطبوخ", kcal:220, protein:8, tags:["meal"]},
+      {id:"cornflakes", name:"كورن فليكس", cat:"carbs", serving:"30 جم", kcal:114, protein:2, tags:["breakfast"]},
+      {id:"granola", name:"جرانولا", cat:"carbs", serving:"40 جم", kcal:180, protein:4, tags:["breakfast","snack"]},
+      {id:"dates", name:"تمر", cat:"carbs", serving:"3 حبات", kcal:70, protein:1, tags:["snack"]},
+      {id:"banana_oat_pancake", name:"بانكيك شوفان", cat:"carbs", serving:"قطعتان", kcal:220, protein:8, tags:["breakfast"]},
+
+      {id:"greek_yogurt", name:"لبن يوناني", cat:"dairy", serving:"170 جم", kcal:100, protein:17, tags:["breakfast","snack"]},
+      {id:"labneh_light", name:"لبنة خفيفة", cat:"dairy", serving:"2 ملعقة كبيرة", kcal:60, protein:4, tags:["breakfast","snack"]},
+      {id:"cottage_cheese", name:"جبن قريش", cat:"dairy", serving:"100 جم", kcal:98, protein:11, tags:["breakfast","snack"]},
+      {id:"milk", name:"حليب قليل الدسم", cat:"dairy", serving:"1 كوب", kcal:100, protein:8, tags:["breakfast","snack"]},
+      {id:"protein_shake", name:"واي بروتين", cat:"dairy", serving:"1 سكوب", kcal:120, protein:24, tags:["snack","post"]},
+      {id:"protein_bar", name:"بروتين بار", cat:"dairy", serving:"1 بار", kcal:200, protein:20, tags:["snack"]},
+      {id:"lowfat_cheese_slice", name:"جبن قليل الدسم", cat:"dairy", serving:"2 شريحة", kcal:100, protein:10, tags:["breakfast","snack"]},
+
+      {id:"banana", name:"موز", cat:"fruits", serving:"1 حبة", kcal:105, protein:1, tags:["breakfast","snack","pre"]},
+      {id:"apple", name:"تفاح", cat:"fruits", serving:"1 حبة", kcal:95, protein:0.5, tags:["snack"]},
+      {id:"berries", name:"توت", cat:"fruits", serving:"1 كوب", kcal:80, protein:1, tags:["breakfast","snack"]},
+      {id:"orange", name:"برتقال", cat:"fruits", serving:"1 حبة", kcal:62, protein:1, tags:["snack"]},
+      {id:"watermelon", name:"بطيخ", cat:"fruits", serving:"2 كوب", kcal:90, protein:2, tags:["snack"]},
+
+      {id:"salad", name:"سلطة خضراء", cat:"veggies", serving:"طبق", kcal:35, protein:2, tags:["meal"]},
+      {id:"cucumber", name:"خيار", cat:"veggies", serving:"1 كوب", kcal:16, protein:1, tags:["meal","snack"]},
+      {id:"tomato", name:"طماطم", cat:"veggies", serving:"1 كوب", kcal:32, protein:2, tags:["meal"]},
+      {id:"broccoli", name:"بروكلي", cat:"veggies", serving:"1 كوب", kcal:55, protein:4, tags:["meal"]},
+      {id:"mixed_veg", name:"خضار مشكلة", cat:"veggies", serving:"1 كوب", kcal:60, protein:3, tags:["meal"]},
+
+      {id:"olive_oil", name:"زيت زيتون", cat:"fats", serving:"1 ملعقة كبيرة", kcal:119, protein:0, tags:["meal"]},
+      {id:"avocado", name:"أفوكادو", cat:"fats", serving:"نصف حبة", kcal:120, protein:2, tags:["meal","snack"]},
+      {id:"almonds", name:"لوز", cat:"fats", serving:"15 حبة", kcal:105, protein:4, tags:["snack"]},
+      {id:"peanut_butter", name:"زبدة فول سوداني", cat:"fats", serving:"1 ملعقة كبيرة", kcal:95, protein:4, tags:["breakfast","snack"]},
+      {id:"walnuts", name:"جوز", cat:"fats", serving:"15 جم", kcal:98, protein:2, tags:["snack"]}
+    ];
+
+
+    const KEY_PROFILE_BASE = "fit_profile_auth_v1";
+    const KEY_PROFILE_EDITOR_BASE = "fit_profile_editor_open_v1";
+    const KEY_PROFILE_EDITOR_FALLBACK = "fit_profile_editor_open_fallback_v1";
+    const KEY_LOG_BASE = "fit_log_auth_v1";
+    const KEY_LOG_FALLBACK = "fit_log_last_v1";
+    const KEY_DIET_BASE = "fit_diet_auth_v1";
+    const KEY_WORKOUT_PLAN_BASE = "fit_workout_plan_auth_v1";
+    const KEY_WORKOUT_PLAN_FALLBACK = "fit_workout_plan_last_v1";
+
+    const cloud = {
+      enabled: false,
+      db: null,
+      auth: null,
+      user: null,
+      docRef: null,
+      status: "local", // local | online | syncing | error
+      lastError: ""
+    };
+    function activeUid(){ return cloud.user?.uid || "guest"; }
+    function profileKey(){ return `${KEY_PROFILE_BASE}_${activeUid()}`; }
+    function profileEditorStateKey(){ return `${KEY_PROFILE_EDITOR_BASE}_${activeUid()}`; }
+    function logKey(){ return `${KEY_LOG_BASE}_${activeUid()}`; }
+    function logFallbackKey(){ return KEY_LOG_FALLBACK; }
+    function dietKey(){ return `${KEY_DIET_BASE}_${activeUid()}`; }
+    function workoutPlanKey(){ return `${KEY_WORKOUT_PLAN_BASE}_${activeUid()}`; }
+    function workoutPlanFallbackKey(){ return KEY_WORKOUT_PLAN_FALLBACK; }
+
+    function readStoredProfileEditorState(){
+      try{
+        const primary = localStorage.getItem(profileEditorStateKey());
+        if(primary === "1") return true;
+        if(primary === "0") return false;
+
+        const fallback = localStorage.getItem(KEY_PROFILE_EDITOR_FALLBACK);
+        if(fallback === "1") return true;
+        if(fallback === "0") return false;
+      }catch(_e){}
+      return null;
+    }
+
+    function persistProfileEditorState(show){
+      const safe = show ? "1" : "0";
+      if(activeUid() === "guest" && cloud.auth) return;
+      try{ localStorage.setItem(profileEditorStateKey(), safe); }catch(_e){}
+      try{ localStorage.setItem(KEY_PROFILE_EDITOR_FALLBACK, safe); }catch(_e){}
+    }
+
+    function readJSON(key, fallback){
+      try{
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      }catch{
+        return fallback;
+      }
+    }
+    function writeJSON(key, value){
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+    function clearCurrentLocalData(){
+      localStorage.removeItem(profileKey());
+      localStorage.removeItem(profileEditorStateKey());
+      localStorage.removeItem(KEY_PROFILE_EDITOR_FALLBACK);
+      localStorage.removeItem(logKey());
+      localStorage.removeItem(logFallbackKey());
+      localStorage.removeItem(dietKey());
+      localStorage.removeItem(workoutPlanKey());
+      localStorage.removeItem(workoutPlanFallbackKey());
+    }
+
+    function isProfileComplete(p){
+      return !!(p &&
+        Number.isFinite(Number(p.age)) && Number(p.age) > 0 &&
+        Number.isFinite(Number(p.height)) && Number(p.height) > 0 &&
+        Number.isFinite(Number(p.weight)) && Number(p.weight) > 0 &&
+        p.sex && p.activity && p.goal
+      );
+    }
+
+    function updateSaveState(tempText){
+      const el = $("saveState");
+      if(!el) return;
+      if(tempText){ el.textContent = tempText; return; }
+
+      if(!cloud.enabled){ el.textContent = "محفوظ محلياً على جهازك"; return; }
+      if(!cloud.user){ el.textContent = "سجّل الدخول لتفعيل المزامنة"; return; }
+
+      if(cloud.status === "syncing") el.textContent = "جاري المزامنة مع Firebase…";
+      else if(cloud.status === "online") el.textContent = "متصل بـ Firebase ✅";
+      else if(cloud.status === "error") el.textContent = "خطأ مزامنة — محفوظ محلياً";
+      else el.textContent = "محفوظ محلياً على جهازك";
+    }
+
+    function setPillMessage(id, msg, isError=false){
+      const el = $(id);
+      if(!el) return;
+      if(!msg){
+        el.hidden = true;
+        el.textContent = "";
+        return;
+      }
+      el.hidden = false;
+      el.textContent = msg;
+      el.style.color = isError ? "var(--bad)" : "var(--text)";
+      el.style.borderColor = isError ? "rgba(255,124,134,.35)" : "var(--line)";
+      el.style.background = isError ? "rgba(255,124,134,.08)" : "rgba(95,207,167,.07)";
+    }
+
+    function authErrorText(err){
+      const code = err?.code || "";
+      if(code.includes("invalid-email")) return "البريد الإلكتروني غير صحيح.";
+      if(code.includes("user-not-found")) return "لا يوجد حساب بهذا البريد.";
+      if(code.includes("wrong-password") || code.includes("invalid-credential")) return "البريد أو كلمة المرور غير صحيحة.";
+      if(code.includes("email-already-in-use")) return "هذا البريد مستخدم مسبقاً.";
+      if(code.includes("weak-password")) return "كلمة المرور ضعيفة (اجعلها 6 أحرف أو أكثر).";
+      if(code.includes("too-many-requests")) return "محاولات كثيرة، حاول بعد قليل.";
+      if(code.includes("network-request-failed")) return "تحقق من الإنترنت ثم حاول مرة أخرى.";
+      if(code.includes("requires-recent-login")) return "يلزم تسجيل دخول حديث. سجّل خروج ثم ادخل مرة أخرى.";
+      if(code.includes("permission-denied")) return "لا توجد صلاحيات على Firestore (راجع قواعد Rules).";
+      return err?.message || "حدث خطأ غير متوقع.";
+    }
+
+    function setMainVisibility(showApp){
+      $("authPanel").hidden = !!showApp;
+      $("appMain").hidden = !showApp;
+      $("userBar").hidden = !showApp;
+    }
+
+    function refreshUserBadge(){
+      const user = cloud.user;
+      const nameText = $("userNameText");
+      const avatarText = $("userAvatarText");
+      const avatarImg = $("userAvatarImg");
+
+      if(!user){
+        if(nameText) nameText.textContent = "غير مسجل";
+        if(avatarText) avatarText.textContent = "؟";
+        if(avatarImg){ avatarImg.hidden = true; avatarImg.removeAttribute("src"); }
+        return;
+      }
+
+      const label = (user.displayName && user.displayName.trim()) ? user.displayName.trim() : (user.email || "مستخدم");
+      if(nameText) nameText.textContent = label;
+
+      const photo = user.photoURL || "";
+      if(photo && avatarImg){
+        avatarImg.src = photo;
+        avatarImg.hidden = false;
+        if(avatarText) avatarText.textContent = "";
+      }else{
+        if(avatarImg){ avatarImg.hidden = true; avatarImg.removeAttribute("src"); }
+        const initial = (label || "؟").trim()[0] || "؟";
+        if(avatarText) avatarText.textContent = initial;
+      }
+    }
+
+    function setProfileEditor(showEditor, options = {}){
+      const safeShow = !!showEditor;
+      const shouldPersist = options.persist !== false;
+      window.__profileEditorVisible = safeShow;
+      if(shouldPersist) persistProfileEditorState(safeShow);
+      const form = $("profileFormSection");
+      const hint = $("profileLockHint");
+      const title = $("profileCardTitle");
+
+      if(form) form.hidden = !showEditor;
+
+      const p = loadProfile();
+      const complete = isProfileComplete(p);
+
+      if(showEditor){
+        if(hint) hint.hidden = true;
+        if(title){
+          if(cloud.user) title.textContent = complete ? "١) تعديل الملف الشخصي + الحسبة" : "١) إعداد الملف الشخصي (مرة واحدة)";
+          else title.textContent = "١) بياناتك + الحسبة";
+        }
+      }else{
+        if(title) title.textContent = "١) الاحتياج اليومي + الحسبة";
+        if(hint) hint.hidden = false;
+      }
+    }
+
+    async function initFirebaseServices(){
+      try{
+        const app = initializeApp(firebaseConfig);
+        try{
+          if(await analyticsSupported()){
+            getAnalytics(app);
+          }
+        }catch(_e){}
+        cloud.db = getFirestore(app);
+        cloud.auth = getAuth(app);
+        await setPersistence(cloud.auth, browserLocalPersistence);
+        cloud.enabled = true;
+        cloud.status = "local";
+      }catch(err){
+        cloud.enabled = false;
+        cloud.status = "error";
+        cloud.lastError = err?.message || String(err);
+        console.warn("Firebase init failed:", err);
+      }
+      updateSaveState();
+    }
+
+    let syncTimer = null;
+    function scheduleCloudSync(){
+      if(!cloud.enabled || !cloud.user || !cloud.docRef) return;
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(() => {
+        syncToCloud().catch(err => {
+          cloud.status = "error";
+          cloud.lastError = err?.message || String(err);
+          updateSaveState();
+          console.warn("Cloud sync failed:", err);
+        });
+      }, 350);
+    }
+
+    async function syncToCloud(){
+      if(!cloud.enabled || !cloud.user || !cloud.docRef) return;
+      cloud.status = "syncing";
+      updateSaveState();
+
+      const profile = readJSON(profileKey(), {});
+      const log = readJSON(logKey(), []);
+      const dietPrefs = readJSON(dietKey(), { selected: [], updatedAtClient: 0 });
+      const workoutPlan = readJSON(workoutPlanKey(), null);
+
+      const payload = {
+        uid: cloud.user.uid,
+        email: cloud.user.email || "",
+        profile,
+        log,
+        dietPrefs,
+        workoutPlan,
+        profileCompleted: isProfileComplete(profile),
+        updatedAtClient: Date.now(),
+        updatedAt: serverTimestamp()
+      };
+
+      await setDoc(cloud.docRef, payload, { merge: true });
+      cloud.status = "online";
+      updateSaveState();
+    }
+
+    async function loadFromCloudForUser(user){
+      if(!cloud.enabled || !user || !cloud.docRef) return false;
+      try{
+        cloud.status = "syncing";
+        updateSaveState();
+
+        const snap = await getDoc(cloud.docRef);
+        if(snap.exists()){
+          const data = snap.data() || {};
+          if(data.profile && typeof data.profile === "object") writeJSON(profileKey(), data.profile);
+          if(Array.isArray(data.log)) writeJSON(logKey(), data.log);
+          if(data.dietPrefs && typeof data.dietPrefs === "object") writeJSON(dietKey(), data.dietPrefs);
+          if(data.workoutPlan && typeof data.workoutPlan === "object"){
+            writeJSON(workoutPlanKey(), data.workoutPlan);
+            writeJSON(workoutPlanFallbackKey(), data.workoutPlan);
+          }
+        }
+
+        cloud.status = "online";
+        updateSaveState();
+        return true;
+      }catch(err){
+        cloud.status = "error";
+        cloud.lastError = err?.message || String(err);
+        updateSaveState();
+        console.warn("Cloud load failed:", err);
+        return false;
+      }
+    }
+
+    const loadProfile = () => readJSON(profileKey(), {});
+    const saveProfile = (p) => { writeJSON(profileKey(), p); scheduleCloudSync(); };
+    const isLogValid = (rows) => Array.isArray(rows);
+    const loadLog = () => {
+      const primary = readJSON(logKey(), null);
+      const fallback = readJSON(logFallbackKey(), null);
+      const primaryOk = isLogValid(primary);
+      const fallbackOk = isLogValid(fallback);
+
+      if(primaryOk && (primary.length || !fallbackOk || !fallback.length)){
+        writeJSON(logFallbackKey(), primary);
+        return primary;
+      }
+
+      if(fallbackOk){
+        if(activeUid() !== "guest"){
+          writeJSON(logKey(), fallback);
+          scheduleCloudSync();
+        }
+        return fallback;
+      }
+
+      return primaryOk ? primary : [];
+    };
+    const saveLog = (rows) => {
+      const safeRows = Array.isArray(rows) ? rows : [];
+      writeJSON(logKey(), safeRows);
+      writeJSON(logFallbackKey(), safeRows);
+      scheduleCloudSync();
+    };
+    const loadDietPrefs = () => readJSON(dietKey(), { selected: [], updatedAtClient: 0 });
+    const saveDietPrefs = (prefs) => { writeJSON(dietKey(), prefs); scheduleCloudSync(); };
+    const isWorkoutPlanValid = (plan) => !!(plan && Array.isArray(plan.days) && plan.days.length);
+    const loadWorkoutPlan = () => {
+      const primary = readJSON(workoutPlanKey(), null);
+      if(isWorkoutPlanValid(primary)){
+        writeJSON(workoutPlanFallbackKey(), primary);
+        return primary;
+      }
+
+      const fallback = readJSON(workoutPlanFallbackKey(), null);
+      if(isWorkoutPlanValid(fallback)){
+        if(activeUid() !== "guest") writeJSON(workoutPlanKey(), fallback);
+        return fallback;
+      }
+
+      return null;
+    };
+    const saveWorkoutPlan = (plan) => {
+      const safePlan = isWorkoutPlanValid(plan) ? plan : null;
+      writeJSON(workoutPlanKey(), safePlan);
+      writeJSON(workoutPlanFallbackKey(), safePlan);
+      scheduleCloudSync();
+    };
+
+    function calcBMR({sex, weight, height, age}){
+      const base = 10*weight + 6.25*height - 5*age;
+      return sex === "female" ? (base - 161) : (base + 5);
+    }
+    function goalCalories(tdee, goal){
+      if(goal === "cut") return tdee * 0.80;
+      if(goal === "bulk") return tdee * 1.10;
+      if(goal === "recomp") return tdee * 1.00;
+      return tdee;
+    }
+    function proteinRangePerKg(goal){
+      if(goal === "cut") return [2.2, 2.4];
+      if(goal === "bulk") return [2.0, 2.2];
+      if(goal === "recomp") return [2.0, 2.2];
+      return [1.6, 2.0];
+    }
+    function applySafetyFloors(cals, sex){
+      const floor = (sex === "female") ? 1200 : 1500;
+      return Math.max(cals, floor);
+    }
+
+    function updateAdvice(){
+      const goal = $("goal").value;
+      const cardioPref = $("cardioPref").value;
+
+      const cardio = [];
+      if(cardioPref === "none"){
+        cardio.push("إذا هدفك تنشيف: اجعل الحركة اليومية (خطوات) أولوية، وكارديو اختياري.");
+      } else if(cardioPref === "light"){
+        cardio.push("2–3 جلسات أسبوعياً × 20–30 دقيقة.");
+        cardio.push("أفضل توقيت: بعد الحديد أو في يوم منفصل.");
+      } else if(cardioPref === "moderate"){
+        cardio.push("3–4 جلسات أسبوعياً × 25–40 دقيقة.");
+        cardio.push("حافظ على شدة متوسطة لتجنب التأثير على التعافي.");
+      } else {
+        cardio.push("4–6 جلسات أسبوعياً × 30–45 دقيقة.");
+        cardio.push("راقب النوم والتعب، وقلل حجم الحديد إذا لزم.");
+      }
+
+      const cardioTypes = [
+        "LISS: مشي سريع/دراجة ثابتة شدة خفيفة-متوسطة.",
+        "HIIT (اختياري): 8–12 جولة (20ث سريع + 100ث بطيء) مرة/أسبوع كحد أقصى للمبتدئ.",
+        "Zone 2: نشاط مستمر يمكنك معه الكلام بصعوبة بسيطة."
+      ];
+
+      if(goal === "bulk") cardioTypes.push("في التضخيم: الكارديو لتحسين اللياقة والقلب (لا تبالغ حتى لا تقلل فائض السعرات).");
+      if(goal === "cut") cardioTypes.push("في التنشيف: ابدأ بخطوات أكثر ثم أضف كارديو تدريجياً بدلاً من قص سعرات كبير جداً.");
+
+      $("cardioAdvice").innerHTML = "<ul style='margin:8px 0 0; padding-right:18px;'>" +
+        cardio.map(x=>`<li>${x}</li>`).join("") +
+        "<li><b>أنواع مناسبة:</b><ul style='margin:6px 0 0; padding-right:18px;'>" +
+        cardioTypes.map(x=>`<li>${x}</li>`).join("") +
+        "</ul></li></ul>";
+
+      const food = [];
+      food.push("ركز على بروتين عالي: دجاج/تونة/لحم قليل دهن/بيض/لبن يوناني/واي بروتين.");
+      food.push("كربوهيدرات نظيفة حول التمرين: رز/شوفان/بطاطس/خبز قمح.");
+      food.push("دهون صحية بكمية محسوبة: زيت زيتون/أفوكادو/مكسرات.");
+      food.push("خضار + ماء + ملح كفاية (خصوصاً مع التعرق).");
+
+      if(goal === "cut"){
+        food.push("اختر أطعمة مشبعة: شوربة/خضار/بروتين، وقلل المشروبات السكرية.");
+      } else if(goal === "bulk"){
+        food.push("لرفع السعرات بسهولة: رز/مكرونة/زيت زيتون/مكسرات/سموثي بروتين.");
+      } else if(goal === "recomp"){
+        food.push("حافظ على ثبات عالي: بروتين ثابت + خطوات يومية + أوزان متدرجة.");
+      }
+
+      $("foodAdvice").innerHTML = "<ul style='margin:8px 0 0; padding-right:18px;'>" +
+        food.map(x=>`<li>${x}</li>`).join("") + "</ul>";
+    }
+
+    function fillProfileForm(p){
+      $("name").value = p.name ?? "";
+      $("sex").value = p.sex ?? "male";
+      $("age").value = p.age ?? "";
+      $("height").value = p.height ?? "";
+      $("weight").value = p.weight ?? "";
+      $("activity").value = p.activity ?? "1.55";
+      $("goal").value = p.goal ?? "recomp";
+      $("cardioPref").value = p.cardioPref ?? "light";
+    }
+    function readProfileForm(){
+      return {
+        name: $("name").value.trim(),
+        sex: $("sex").value,
+        age: Number($("age").value),
+        height: Number($("height").value),
+        weight: Number($("weight").value),
+        activity: Number($("activity").value),
+        goal: $("goal").value,
+        cardioPref: $("cardioPref").value
+      };
+    }
+
+    
+    function generateMealPlan(cals, proLo, proHi, goal){
+      const kcal = Math.round(cals);
+      const pLo = Math.round(proLo);
+      const pHi = Math.round(proHi);
+
+      const goalHint = (goal === "bulk")
+        ? "إذا كان الأداء ضعيف/جوع: زد 100–200 سعرة (رز/بطاطس/زيت زيتون)."
+        : (goal === "cut")
+          ? "للتنشيف: ثبت البروتين وركز على الخضار والماء، وزد الخطوات."
+          : (goal === "recomp")
+            ? "لـ Recomp: ثبت السعرات قريب من TDEE، وركز على التدرج بالأوزان."
+            : "للتثبيت: حافظ على نفس السعرات وراقب الوزن أسبوعياً.";
+
+      
+      const out = document.getElementById("mealPlanOut");
+      if(out) out.innerHTML = plan;
+    }
+
+
+    function getDietPrefsState(){
+      const raw = loadDietPrefs();
+      const selected = Array.isArray(raw?.selected) ? raw.selected.filter(id => FOOD_LIBRARY.some(item => item.id === id)) : [];
+      return {
+        ...(raw || {}),
+        selected: [...new Set(selected)],
+        planVariant: Math.max(0, Number(raw?.planVariant) || 0)
+      };
+    }
+
+    function getDietPlanVariant(){
+      return getDietPrefsState().planVariant;
+    }
+
+    function saveDietPrefsState(next = {}){
+      const prev = getDietPrefsState();
+      const selected = Array.isArray(next.selected) ? next.selected.filter(id => FOOD_LIBRARY.some(item => item.id === id)) : prev.selected;
+      saveDietPrefs({
+        ...prev,
+        ...next,
+        selected: [...new Set(selected)],
+        planVariant: Math.max(0, Number(next.planVariant ?? prev.planVariant) || 0),
+        updatedAtClient: Date.now()
+      });
+    }
+
+    function readDietTargetNumber(...ids){
+      for(const id of ids){
+        const el = document.getElementById(id);
+        const raw = String(el?.textContent || '').replace(/,/g, '');
+        const match = raw.match(/\d+(?:\.\d+)?/);
+        if(match) return Number(match[0]);
+      }
+      return 0;
+    }
+
+    function pickCycle(items, seed){
+      if(!Array.isArray(items) || !items.length) return null;
+      const index = Math.abs(Number(seed) || 0) % items.length;
+      return items[index];
+    }
+
+    function mergeUniqueItems(...lists){
+      const map = new Map();
+      lists.flat().filter(Boolean).forEach(item => {
+        if(item && !map.has(item.id)) map.set(item.id, item);
+      });
+      return [...map.values()];
+    }
+
+    function buildDietChoicePlanHTML(selectedIds){
+      const selected = Array.isArray(selectedIds)
+        ? selectedIds.map(id => FOOD_LIBRARY.find(item => item.id === id)).filter(Boolean)
+        : [];
+
+      if(!selected.length){
+        return '<span class="muted">اختر الأصناف المناسبة لك ثم احفظها، وبعدها ستختفي القائمة ويُبنى لك جدول 7 أيام متوازن. للحصول على خطة منطقية اختر على الأقل: 2 بروتين + 2 كربوهيدرات + 1 سناك + 1 خضار.</span>';
+      }
+
+      const selectedByCat = {
+        protein: selected.filter(item => item.cat === 'protein'),
+        carbs: selected.filter(item => item.cat === 'carbs'),
+        dairy: selected.filter(item => item.cat === 'dairy'),
+        fruits: selected.filter(item => item.cat === 'fruits'),
+        veggies: selected.filter(item => item.cat === 'veggies'),
+        fats: selected.filter(item => item.cat === 'fats')
+      };
+
+      const libraryById = (ids) => ids.map(id => FOOD_LIBRARY.find(item => item.id === id)).filter(Boolean);
+      const byTags = (items, tags) => (items || []).filter(item => (item.tags || []).some(tag => tags.includes(tag)));
+      const fallbackNotes = [];
+      const usePool = (items, fallbackIds, label) => {
+        const clean = (items || []).filter(Boolean);
+        if(clean.length) return clean;
+        const fallback = libraryById(fallbackIds);
+        if(fallback.length && label && !fallbackNotes.includes(label)) fallbackNotes.push(label);
+        return fallback;
+      };
+
+      const breakfastProteinPool = usePool(
+        mergeUniqueItems(byTags(selectedByCat.protein, ['breakfast','snack']), byTags(selectedByCat.dairy, ['breakfast','snack'])),
+        ['boiled_eggs','greek_yogurt','cottage_cheese'],
+        'بروتين مناسب للفطور'
+      );
+      const breakfastCarbPool = usePool(
+        mergeUniqueItems(byTags(selectedByCat.carbs, ['breakfast']), byTags(selectedByCat.carbs, ['meal'])),
+        ['oats','brown_toast','toast_bread'],
+        'كربوهيدرات مناسبة للفطور'
+      );
+      const mainProteinPool = usePool(
+        mergeUniqueItems(byTags(selectedByCat.protein, ['meal']), byTags(selectedByCat.protein, ['breakfast','snack']), byTags(selectedByCat.dairy, ['post','snack'])),
+        ['chicken_breast','tuna','fish'],
+        'مصدر بروتين رئيسي'
+      );
+      const mainCarbPool = usePool(
+        mergeUniqueItems(byTags(selectedByCat.carbs, ['meal']), byTags(selectedByCat.carbs, ['breakfast']), byTags(selectedByCat.fruits, ['pre'])),
+        ['rice','potato','brown_rice'],
+        'مصدر كربوهيدرات رئيسي'
+      );
+      const veggiePool = usePool(
+        mergeUniqueItems(selectedByCat.veggies),
+        ['salad','mixed_veg','broccoli'],
+        'خضار جانبية'
+      );
+      const snackProteinPool = usePool(
+        mergeUniqueItems(byTags(selectedByCat.dairy, ['snack','post','breakfast']), byTags(selectedByCat.protein, ['snack','breakfast'])),
+        ['greek_yogurt','protein_shake','cottage_cheese'],
+        'سناك بروتيني'
+      );
+      const snackCarbPool = usePool(
+        mergeUniqueItems(byTags(selectedByCat.fruits, ['snack','pre','breakfast']), byTags(selectedByCat.carbs, ['snack','breakfast'])),
+        ['banana','apple','dates'],
+        'سناك كربوهيدرات/فاكهة'
+      );
+      const healthyFatPool = usePool(
+        mergeUniqueItems(selectedByCat.fats),
+        ['almonds','peanut_butter','avocado'],
+        'دهون صحية محسوبة'
+      );
+
+      const targetKcal = Math.max(1100, Math.round(readDietTargetNumber('dietCalMirror', 'calOut') || 1600));
+      const targetProtein = Math.max(60, Math.round(readDietTargetNumber('dietProMirror', 'proOut') || 120));
+      const variant = getDietPlanVariant();
+
+      const formatItem = (entry) => {
+        const factor = Math.max(1, Number(entry?.factor) || 1);
+        const item = entry?.item;
+        if(!item) return '';
+        return factor > 1 ? `${item.name} (${item.serving} × ${factor})` : `${item.name} (${item.serving})`;
+      };
+
+      const makeMeal = (label, entries) => {
+        const clean = (entries || []).filter(part => part && part.item);
+        if(!clean.length) return null;
+        const kcal = clean.reduce((sum, part) => sum + ((Number(part.item.kcal) || 0) * (Math.max(1, Number(part.factor) || 1))), 0);
+        const protein = Math.round(clean.reduce((sum, part) => sum + ((Number(part.item.protein) || 0) * (Math.max(1, Number(part.factor) || 1))), 0) * 10) / 10;
+        return {
+          label,
+          text: clean.map(formatItem).join(' + '),
+          kcal: Math.round(kcal),
+          protein
+        };
+      };
+
+      const proteinFactor = targetProtein >= 175 ? 2 : 1;
+      const lunchCarbFactor = targetKcal >= 2400 ? 2 : 1;
+      const dinnerCarbFactor = targetKcal >= 2100 ? 1 : 0;
+      const includeFruitAtBreakfast = targetKcal >= 1650;
+      const includeSnack2 = targetKcal >= 1500;
+      const includeWorkoutMeal = targetKcal >= 2100;
+      const includeExtraFatInMainMeals = targetKcal >= 2300;
+
+      const buildDay = (dayIndex) => {
+        const seed = (variant * 19) + (dayIndex * 11);
+        const breakfast = makeMeal('الفطور', [
+          { item: pickCycle(breakfastProteinPool, seed + 1), factor: proteinFactor },
+          { item: pickCycle(breakfastCarbPool, seed + 2), factor: targetKcal >= 2300 ? 2 : 1 },
+          includeFruitAtBreakfast ? { item: pickCycle(snackCarbPool, seed + 3) } : null
+        ]);
+
+        const snack1 = makeMeal('سناك 1', [
+          { item: pickCycle(snackProteinPool, seed + 4) },
+          { item: pickCycle(snackCarbPool, seed + 5) },
+          targetKcal >= 2200 ? { item: pickCycle(healthyFatPool, seed + 6) } : null
+        ]);
+
+        const lunch = makeMeal('الغداء', [
+          { item: pickCycle(mainProteinPool, seed + 7), factor: proteinFactor },
+          { item: pickCycle(mainCarbPool, seed + 8), factor: lunchCarbFactor },
+          { item: pickCycle(veggiePool, seed + 9) },
+          includeExtraFatInMainMeals ? { item: pickCycle(healthyFatPool, seed + 10) } : null
+        ]);
+
+        const snack2 = includeSnack2 ? makeMeal('سناك 2', [
+          { item: pickCycle(snackProteinPool, seed + 11) },
+          { item: pickCycle(snackCarbPool, seed + 12) }
+        ]) : null;
+
+        const dinnerEntries = [
+          { item: pickCycle(mainProteinPool, seed + 13), factor: proteinFactor },
+          dinnerCarbFactor ? { item: pickCycle(mainCarbPool, seed + 14), factor: dinnerCarbFactor } : null,
+          { item: pickCycle(veggiePool, seed + 15) }
+        ];
+        if(targetKcal >= 2500) dinnerEntries.push({ item: pickCycle(healthyFatPool, seed + 16) });
+        const dinner = makeMeal('العشاء', dinnerEntries);
+
+        const workoutMeal = includeWorkoutMeal ? makeMeal('قبل/بعد التمرين', [
+          { item: pickCycle(usePool(mergeUniqueItems(byTags(selectedByCat.dairy, ['post','snack']), byTags(selectedByCat.protein, ['snack','breakfast'])), ['protein_shake','greek_yogurt'], ''), seed + 17) },
+          { item: pickCycle(usePool(mergeUniqueItems(byTags(selectedByCat.fruits, ['pre','snack']), byTags(selectedByCat.carbs, ['snack','breakfast'])), ['banana','dates'], ''), seed + 18) }
+        ]) : null;
+
+        const meals = [breakfast, snack1, lunch, snack2, dinner, workoutMeal].filter(Boolean);
+        let totalKcal = meals.reduce((sum, meal) => sum + meal.kcal, 0);
+        let totalProtein = Math.round(meals.reduce((sum, meal) => sum + meal.protein, 0) * 10) / 10;
+
+        let extraCount = 0;
+        while(totalKcal < (targetKcal * 0.9) && extraCount < 2){
+          const extraMeal = makeMeal(extraCount === 0 ? 'إضافة مرنة' : `إضافة مرنة ${extraCount + 1}`, [
+            { item: pickCycle(snackProteinPool, seed + 30 + extraCount) },
+            { item: pickCycle(extraCount === 0 ? mainCarbPool : snackCarbPool, seed + 40 + extraCount) }
+          ]);
+          if(!extraMeal) break;
+          meals.push(extraMeal);
+          totalKcal += extraMeal.kcal;
+          totalProtein = Math.round((totalProtein + extraMeal.protein) * 10) / 10;
+          extraCount += 1;
+        }
+
+        return {
+          meals,
+          totalKcal: Math.round(totalKcal),
+          totalProtein,
+          targetNote: `الهدف اليومي: ${targetKcal} سعرة • ${targetProtein} جم بروتين`
+        };
+      };
+
+      const days = Array.from({length:7}, (_, i) => buildDay(i));
+      const fallbackNoteHTML = fallbackNotes.length
+        ? `<div class="muted" style="font-size:12px; margin-top:6px;">تم استكمال بعض العناصر الأساسية تلقائياً لأن الاختيارات الحالية لا تكفي لبناء وجبات متوازنة بالكامل: ${fallbackNotes.join('، ')}.</div>`
+        : '';
+
+      return `
+        <div class="dietWeekIntro">
+          <strong>جدول 7 أيام مبني على اختياراتك</strong><br>
+          <span class="muted">الخطة الآن تعطي وجبات متوازنة: فطور فعلي، غداء وعشاء فيهما مصدر بروتين + كربوهيدرات + خضار، وسناكات منطقية. إذا لم يناسبك الترتيب اضغط <strong>"جدول آخر"</strong> ليتم تبديل الأصناف بين الأيام.</span>
+          ${fallbackNoteHTML}
+        </div>
+        <div class="weekPlanGrid">
+          ${days.map((day, idx) => `
+            <section class="weekDayPlan">
+              <div class="weekDayHead">
+                <strong>اليوم ${idx + 1}</strong>
+                <span>حوالي ${day.totalKcal} س • ${day.totalProtein} بروتين</span>
+              </div>
+              <div class="muted" style="font-size:12px; margin-bottom:8px;">${day.targetNote}</div>
+              <div class="weekMeals">
+                ${day.meals.map(meal => `
+                  <div class="weekMealRow">
+                    <div class="lbl">${meal.label}</div>
+                    <div class="txt">${meal.text}</div>
+                    <div class="meta">${meal.kcal} سعرة • ${meal.protein} جم بروتين</div>
+                  </div>
+                `).join('')}
+              </div>
+            </section>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderBodyStatsPanel(p){
+      const weightEl = $("weightOut"), heightEl = $("heightOut"), bmiEl = $("bmiOut"), targetEl = $("weightTargetOut");
+      const weightNote = $("weightNote"), heightNote = $("heightNote"), bmiNote = $("bmiNote"), targetNote = $("weightTargetNote");
+      const age = Number(p.age);
+      const h = Number(p.height);
+      const w = Number(p.weight);
+      const hM = Number.isFinite(h) && h > 0 ? (h / 100) : NaN;
+
+      if(weightEl) weightEl.textContent = Number.isFinite(w) && w > 0 ? `${Math.round(w*10)/10} كجم` : "—";
+      if(heightEl) heightEl.textContent = Number.isFinite(h) && h > 0 ? `${Math.round(h*10)/10} سم` : "—";
+      if(weightNote) weightNote.textContent = Number.isFinite(age) && age > 0 ? `العمر: ${Math.round(age)} سنة` : "أدخل العمر لإكمال الملف الشخصي.";
+      if(heightNote) heightNote.textContent = p.activity ? `النشاط: ${$("activity")?.selectedOptions?.[0]?.textContent || "—"}` : "سيظهر مستوى النشاط هنا.";
+
+      if(!Number.isFinite(w) || w <= 0 || !Number.isFinite(hM) || hM <= 0){
+        if(bmiEl) bmiEl.textContent = "—";
+        if(bmiNote) bmiNote.textContent = "أدخل الطول والوزن لحساب BMI.";
+        if(targetEl) targetEl.textContent = "—";
+        if(targetNote) targetNote.textContent = "يعتمد على BMI الصحي.";
+        return;
+      }
+
+      const bmi = w / (hM*hM);
+      const bmiRounded = (Math.round(bmi * 10) / 10).toFixed(1);
+      let bmiClass = "طبيعي";
+      if(bmi < 18.5) bmiClass = "نقص وزن";
+      else if(bmi < 25) bmiClass = "طبيعي";
+      else if(bmi < 30) bmiClass = "زيادة وزن";
+      else bmiClass = "سمنة";
+
+      const healthyMin = 18.5 * hM * hM;
+      const healthyMax = 24.9 * hM * hM;
+      const suggested = 22 * hM * hM;
+      const diff = w - suggested;
+      const diffAbs = Math.abs(Math.round(diff * 10) / 10);
+      const diffText = diffAbs < 0.1 ? "أنت قريب جداً من الوزن المقترح." : (diff > 0 ? `فرق تقريبي: -${diffAbs} كجم` : `فرق تقريبي: +${diffAbs} كجم`);
+
+      if(bmiEl) bmiEl.textContent = `${bmiRounded}`;
+      if(bmiNote) bmiNote.textContent = `تصنيف BMI: ${bmiClass}`;
+      if(targetEl) targetEl.textContent = `${Math.round(suggested*10)/10} كجم`;
+      if(targetNote) targetNote.textContent = `نطاق صحي تقريبي: ${Math.round(healthyMin*10)/10} – ${Math.round(healthyMax*10)/10} كجم • ${diffText}`;
+    }
+
+    function calcAndRender(){
+      const p = readProfileForm();
+      renderBodyStatsPanel(p);
+      const valid = Number.isFinite(p.age) && Number.isFinite(p.height) && Number.isFinite(p.weight) && p.age>0 && p.height>0 && p.weight>0;
+
+      if(!valid){
+        $("bmrOut").textContent = "—";
+        $("tdeeOut").textContent = "—";
+        $("calOut").textContent = "—";
+        $("proOut").textContent = "—";
+        $("calNote").textContent = "أدخل العمر/الطول/الوزن أولاً.";
+        $("proNote").textContent = "—";
+        updateAdvice();
+        return;
+      }
+
+      const bmr = calcBMR(p);
+      const tdee = bmr * p.activity;
+
+      let cals = goalCalories(tdee, p.goal);
+      if(p.goal === "cut") cals = applySafetyFloors(cals, p.sex);
+
+      const [lo, hi] = proteinRangePerKg(p.goal);
+      const proLo = p.weight * lo;
+      const proHi = p.weight * hi;
+
+      $("bmrOut").textContent = fmt(bmr);
+      $("tdeeOut").textContent = fmt(tdee);
+      $("calOut").textContent = fmt(cals);
+      $("proOut").textContent = `${fmt(proLo)} – ${fmt(proHi)} g`;
+
+      const calNotes = {
+        cut: "خصم ~20% من TDEE (مع حد أدنى تقريبي).",
+        bulk: "زيادة ~10% من TDEE (Lean Bulk).",
+        recomp: "قريب من الاحتياج اليومي (هدف: عضل + دهون أقل تدريجياً).",
+        maintain: "تثبيت: نفس TDEE تقريباً."
+      };
+      $("calNote").textContent = calNotes[p.goal] || "—";
+      $("proNote").textContent = "البروتين حسب وزن الجسم (جم/كجم) ويتغير حسب الهدف.";
+      generateMealPlan(cals, proLo, proHi, p.goal);
+      updateAdvice();
+    }
+
+    function setExerciseOptions(){
+      const split = $("daySelect").value;
+      const list = EXERCISES.filter(e => e.split === split);
+      $("exerciseSelect").innerHTML = list.map(e => `<option value="${e.id}">${e.name}</option>`).join("");
+    }
+
+    function updateLogInputsForGroup(){
+      const g = $("daySelect").value;
+      const repsLabel = $("repsLabel");
+      const loadLabel = $("loadLabel");
+      if(g === "cardio"){
+        if(repsLabel) repsLabel.textContent = "المدة (دقائق)";
+        if(loadLabel) loadLabel.textContent = "الشدة (RPE) أو السرعة";
+        $("repsInput").placeholder = "مثال: 20 أو 30";
+        $("loadInput").placeholder = "مثال: 7 أو 8.5";
+      }else{
+        if(repsLabel) repsLabel.textContent = "العدّات (Reps)";
+        if(loadLabel) loadLabel.textContent = "الوزن (كجم)";
+        $("repsInput").placeholder = "مثال: 12,10,8 أو 12 10 8";
+        $("loadInput").placeholder = "مثال: 40,45,50 أو 40 45 50";
+      }
+    }
+
+    
+    function parseNumberList(raw){
+      // Supports: 12,10,8  |  12،10،8  |  12 10 8  |  12/10/8
+      const cleaned = String(raw || "")
+        .replaceAll("،", ",")
+        .replaceAll(";", ",")
+        .replaceAll("|", ",")
+        .replaceAll("/", ",")
+        .trim();
+
+      // If user typed something like "12 10 8" convert spaces to commas
+      const normalized = cleaned.replace(/\s+/g, ",");
+      const parts = normalized.split(",").map(s => s.trim()).filter(Boolean);
+
+      const nums = parts.map(p => Number(p)).filter(n => Number.isFinite(n));
+      return nums;
+    }
+
+
+    function escapeHtml(value){
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    let editingLogId = null;
+    let plannerLastPlan = null;
+
+    function setLogFormMode(isEdit){
+      const addBtn = $("addSetBtn");
+      const cancelBtn = $("btnCancelEdit");
+      if(addBtn) addBtn.textContent = isEdit ? "حفظ التعديل" : "إضافة للسجل";
+      if(cancelBtn) cancelBtn.hidden = !isEdit;
+    }
+
+    function cancelLogEdit(){
+      editingLogId = null;
+      setLogFormMode(false);
+      $("dateInput").value = todayISO();
+      $("daySelect").value = "chest";
+      setExerciseOptions();
+      updateLogInputsForGroup();
+      $("repsInput").value = "";
+      $("loadInput").value = "";
+      $("noteInput").value = "";
+    }
+
+    function startEditLogRow(id){
+      const rows = loadLog();
+      const row = rows.find(r => r.id === id);
+      if(!row) return;
+
+      editingLogId = id;
+      $("dateInput").value = row.date || todayISO();
+      $("daySelect").value = row.split || "chest";
+      setExerciseOptions();
+      if(row.exId) $("exerciseSelect").value = row.exId;
+      updateLogInputsForGroup();
+      $("repsInput").value = (row.reps ?? "").toString();
+      $("loadInput").value = (row.load ?? "").toString();
+      $("noteInput").value = (row.note ?? "").toString();
+      setLogFormMode(true);
+
+      // ensure training section is visible
+      if(typeof openSection === "function"){ try{ openSection("workouts"); }catch(_e){} }
+      const topEl = $("exerciseSelect");
+      if(topEl) topEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function datePlusISO(offsetDays){
+      const d = new Date();
+      d.setHours(12,0,0,0);
+      d.setDate(d.getDate() + Number(offsetDays || 0));
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function plannerExerciseCount(split, allSplitsCount, level, isFocus=false){
+      if(split === "cardio") return 1;
+      const baseMap = {
+        chest: allSplitsCount <= 3 ? 2 : 1,
+        back: allSplitsCount <= 3 ? 2 : 1,
+        legs: allSplitsCount <= 2 ? 3 : 2,
+        shoulders: allSplitsCount <= 3 ? 2 : 1,
+        core: 1,
+        triceps: 1,
+        biceps: 1
+      };
+      let count = Math.max(1, baseMap[split] || 1);
+      if(level === "advanced" && ["chest","back","legs"].includes(split)) count += 1;
+      if(isFocus && split !== "cardio") count += 1;
+      return count;
+    }
+
+    function plannerProtocolTemplate(daysPerWeek){
+      const days = Math.max(2, Math.min(6, Number(daysPerWeek) || 4));
+      const templates = {
+        2: {
+          protocol: "Upper / Lower",
+          days: [
+            { title: "اليوم 1", subTitle: "علوي (Upper)", splits: ["chest","back","shoulders","biceps","triceps"] },
+            { title: "اليوم 2", subTitle: "سفلي + كور (Lower)", splits: ["legs","core","cardio"] }
+          ]
+        },
+        3: {
+          protocol: "Push / Pull / Legs",
+          days: [
+            { title: "اليوم 1", subTitle: "دفع (Push)", splits: ["chest","shoulders","triceps"] },
+            { title: "اليوم 2", subTitle: "سحب (Pull)", splits: ["back","biceps","core"] },
+            { title: "اليوم 3", subTitle: "أرجل (Legs)", splits: ["legs","core","cardio"] }
+          ]
+        },
+        4: {
+          protocol: "Upper / Lower A-B",
+          days: [
+            { title: "اليوم 1", subTitle: "علوي A", splits: ["chest","back","shoulders"] },
+            { title: "اليوم 2", subTitle: "سفلي A", splits: ["legs","core"] },
+            { title: "اليوم 3", subTitle: "علوي B", splits: ["chest","back","biceps","triceps"] },
+            { title: "اليوم 4", subTitle: "سفلي B + لياقة", splits: ["legs","core","cardio"] }
+          ]
+        },
+        5: {
+          protocol: "Push / Pull / Legs + Upper / Lower",
+          days: [
+            { title: "اليوم 1", subTitle: "دفع (Push)", splits: ["chest","shoulders","triceps"] },
+            { title: "اليوم 2", subTitle: "سحب (Pull)", splits: ["back","biceps"] },
+            { title: "اليوم 3", subTitle: "أرجل (Legs)", splits: ["legs","core"] },
+            { title: "اليوم 4", subTitle: "علوي تكميلي", splits: ["chest","back","shoulders","arms"] },
+            { title: "اليوم 5", subTitle: "سفلي + كارديو", splits: ["legs","core","cardio"] }
+          ]
+        },
+        6: {
+          protocol: "Push / Pull / Legs x2",
+          days: [
+            { title: "اليوم 1", subTitle: "Push A", splits: ["chest","shoulders","triceps"] },
+            { title: "اليوم 2", subTitle: "Pull A", splits: ["back","biceps","core"] },
+            { title: "اليوم 3", subTitle: "Legs A", splits: ["legs","core"] },
+            { title: "اليوم 4", subTitle: "Push B", splits: ["chest","shoulders","triceps"] },
+            { title: "اليوم 5", subTitle: "Pull B", splits: ["back","biceps","core"] },
+            { title: "اليوم 6", subTitle: "Legs B + كارديو", splits: ["legs","core","cardio"] }
+          ]
+        }
+      };
+      return templates[days] || templates[4];
+    }
+
+    function expandProtocolAliases(splits){
+      const out = [];
+      (splits || []).forEach(split => {
+        if(split === "arms"){
+          out.push("biceps", "triceps");
+        }else{
+          out.push(split);
+        }
+      });
+      return [...new Set(out)];
+    }
+
+    function plannerOrderSplits(dayDef, selectedSplits){
+      const base = expandProtocolAliases(dayDef?.splits || []);
+      const selected = Array.isArray(selectedSplits) ? selectedSplits : [];
+      if(!selected.length) return base;
+      const focus = base.filter(s => selected.includes(s));
+      const rest = base.filter(s => !selected.includes(s));
+      return [...focus, ...rest];
+    }
+
+    function buildPlannerDayData(dayDef, opts, seed){
+      const preset = plannerPresets(opts.level, opts.goalStyle);
+      const orderedSplits = plannerOrderSplits(dayDef, opts.selectedSplits);
+      const sections = [];
+      let totalExercises = 0;
+
+      orderedSplits.forEach((split, idx) => {
+        const isCardio = split === "cardio";
+        const exCount = plannerExerciseCount(split, orderedSplits.length, opts.level, (opts.selectedSplits || []).includes(split));
+        const chosen = groupExercisesForPlan(split, exCount, seed + idx);
+        if(chosen.length === 0) return;
+        totalExercises += chosen.length;
+
+        const items = chosen.map((ex) => {
+          if(isCardio){
+            return {
+              split, exId: ex.id, name: ex.name, isCardio: true,
+              setsLabel: `${preset.cardio} • شدة متوسطة (RPE 6–8)`,
+              repsTemplate: "20",
+              loadTemplate: "0",
+              noteHint: "كارديو — اضبط المدة/الشدة حسب مستواك"
+            };
+          }
+          const isIsolation = /(عزل|رفرفة|كيرل|Pushdown|Extension|Curl|Raise)/i.test(ex.name + " " + ex.target);
+          const setsReps = isIsolation ? preset.isoSets : preset.mainSets;
+          const repsTemplate = isIsolation ? "12,12,12" : "10,10,10";
+          return {
+            split, exId: ex.id, name: ex.name, isCardio: false,
+            setsLabel: setsReps,
+            repsTemplate,
+            loadTemplate: "0,0,0",
+            noteHint: `مقترح ${setsReps} — عدّل الوزن لاحقًا`
+          };
+        });
+
+        sections.push({ split, isCardio, items });
+      });
+
+      const warmup = orderedSplits.includes("cardio") && orderedSplits.length === 1
+        ? "إحماء 3–5 دقائق ثم ابدأ تدريجيًا."
+        : "إحماء 5–8 دقائق + مجموعة تمهيدية قبل التمارين الأساسية.";
+
+      const focusVisible = orderedSplits.filter(s => (opts.selectedSplits || []).includes(s));
+      const focusText = focusVisible.length
+        ? `التركيز المختار: ${focusVisible.map(s => SPLIT_LABEL[s] || s).join(" + ")}`
+        : "";
+
+      return {
+        title: dayDef.title,
+        subTitle: dayDef.subTitle || "",
+        protocolLabel: dayDef.protocolLabel || "",
+        totalExercises,
+        sections,
+        rest: preset.rest,
+        note: preset.note,
+        warmup,
+        focusText
+      };
+    }
+
+    function generatePlannerData(opts){
+      const protocolPack = plannerProtocolTemplate(opts.daysPerWeek);
+      const out = {
+        period: opts.period,
+        days: [],
+        meta: {
+          daysPerWeek: Number(opts.daysPerWeek || 0),
+          goalStyle: opts.goalStyle || "",
+          level: opts.level || "",
+          selectedSplits: Array.isArray(opts.selectedSplits) ? opts.selectedSplits.slice() : [],
+          protocol: protocolPack.protocol || "",
+          generatedAt: Date.now()
+        }
+      };
+
+      if(opts.period === "daily"){
+        const dayDef = { ...protocolPack.days[0], protocolLabel: protocolPack.protocol };
+        const d = buildPlannerDayData(dayDef, opts, 0);
+        out.days.push({ label: dayDef.title, dayOffset: 0, ...d });
+        return out;
+      }
+
+      if(opts.period === "weekly"){
+        protocolPack.days.forEach((dayDef, i) => {
+          const withProtocol = { ...dayDef, protocolLabel: protocolPack.protocol };
+          const d = buildPlannerDayData(withProtocol, opts, i * 3);
+          out.days.push({ label: dayDef.title, dayOffset: i, ...d });
+        });
+        return out;
+      }
+
+      for(let w=0; w<4; w++){
+        protocolPack.days.forEach((dayDef, i) => {
+          const titled = {
+            ...dayDef,
+            title: `الأسبوع ${w+1} - ${dayDef.title}`,
+            protocolLabel: protocolPack.protocol
+          };
+          const d = buildPlannerDayData(titled, opts, (w * 5) + (i * 3));
+          out.days.push({ label: titled.title, dayOffset: (w * 7) + i, ...d });
+        });
+      }
+      return out;
+    }
+
+    function addPlannerToLog(){
+      if(!plannerLastPlan || !Array.isArray(plannerLastPlan.days) || plannerLastPlan.days.length === 0){
+        alert("أنشئ الجدول أولاً ثم اضغط إضافة لتماريني.");
+        return;
+      }
+
+      const rows = loadLog();
+      let added = 0;
+      const now = Date.now();
+
+      plannerLastPlan.days.forEach((day, di) => {
+        const date = datePlusISO(day.dayOffset ?? di);
+        (day.sections || []).forEach(sec => {
+          (sec.items || []).forEach((item, idx) => {
+            rows.push({
+              id: (crypto.randomUUID ? crypto.randomUUID() : String(now + added) + Math.random()),
+              date,
+              split: item.split,
+              exId: item.exId,
+              reps: item.repsTemplate || "",
+              load: item.loadTemplate || "",
+              note: `${item.noteHint || "من الجدول المقترح"} • ${day.label || day.title || ""}`.trim(),
+              setsCount: (item.repsTemplate && String(item.repsTemplate).split(",").length) || 1,
+              createdAt: now + added + idx
+            });
+            added++;
+          });
+        });
+      });
+
+      saveLog(rows);
+      renderLog();
+      setTab("log");
+      if(typeof openSection === "function"){ try{ openSection("workouts"); }catch(_e){} }
+      alert(`تمت إضافة ${added} تمرين إلى سجلك ✅\nيمكنك تعديل أي سطر من زر "تعديل".`);
+    }
+
+    function addLogRow(){
+      const date = $("dateInput").value || todayISO();
+      const split = $("daySelect").value;
+      const exId = $("exerciseSelect").value;
+      const repsRaw = $("repsInput").value;
+      const loadRaw = $("loadInput").value;
+      const note = $("noteInput").value.trim();
+
+      const ex = EXERCISES.find(e => e.id === exId);
+      if(!ex) return;
+
+      const repsArr = parseNumberList(repsRaw);
+      const loadArr = parseNumberList(loadRaw);
+
+      if(repsArr.length === 0 || loadArr.length === 0){
+        alert("أدخل العدّات والأوزان. مثال: Reps = 12,10,8 و Kg = 40,45,50");
+        return;
+      }
+
+      let reps = repsArr.slice();
+      let loads = loadArr.slice();
+
+      // Allow single value repeat
+      if(reps.length === 1 && loads.length > 1){
+        reps = Array(loads.length).fill(reps[0]);
+      } else if(loads.length === 1 && reps.length > 1){
+        loads = Array(reps.length).fill(loads[0]);
+      }
+
+      if(reps.length !== loads.length){
+        alert("عدد العدّات يجب أن يساوي عدد الأوزان (أو اكتب رقم واحد وسيتم تكراره).");
+        return;
+      }
+
+      for(let i=0;i<reps.length;i++){
+        const r = reps[i];
+        const w = loads[i];
+        if(!Number.isFinite(r) || r <= 0){
+          alert("تأكد من العدّات: أرقام موجبة فقط.");
+          return;
+        }
+        if(!Number.isFinite(w) || w < 0){
+          alert("تأكد من الأوزان: أرقام صحيحة (يمكن 0).");
+          return;
+        }
+      }
+
+      // Store all sets in ONE row (clearer for the user)
+      const repsText = reps.join(",");
+      const loadsText = loads.join(",");
+
+      const rows = loadLog();
+      const now = Date.now();
+
+      if(editingLogId){
+        const ix = rows.findIndex(r => r.id === editingLogId);
+        if(ix !== -1){
+          rows[ix] = {
+            ...rows[ix],
+            date,
+            split,
+            exId,
+            reps: repsText,
+            load: loadsText,
+            note,
+            setsCount: reps.length,
+            updatedAt: now
+          };
+        }
+      }else{
+        rows.push({
+          id: (crypto.randomUUID ? crypto.randomUUID() : String(now) + Math.random()),
+          date,
+          split,
+          exId,
+          reps: repsText,
+          load: loadsText,
+          note,
+          setsCount: reps.length,
+          createdAt: now
+        });
+      }
+
+      saveLog(rows);
+
+      $("repsInput").value = "";
+      $("loadInput").value = "";
+      $("noteInput").value = "";
+      editingLogId = null;
+      setLogFormMode(false);
+      renderLog();
+    }
+
+
+    function deleteLogRow(id){
+      const rows = loadLog().filter(r => r.id !== id);
+      saveLog(rows);
+      if(editingLogId === id){
+        cancelLogEdit();
+      }
+      renderLog();
+    }
+
+
+    function renderLog(){
+      const container = $("logCards");
+      const rows = loadLog().slice().sort((a,b) => (b.date.localeCompare(a.date)) || (b.createdAt - a.createdAt));
+      if(!container) return;
+
+      if(rows.length === 0){
+        container.innerHTML = `<div class="logEmpty">لا توجد تمارين محفوظة بعد. أضف تمريناً ليظهر هنا بنفس تنسيق بطاقات الأيام.</div>`;
+        $("logCount").textContent = `0 سطر`;
+        return;
+      }
+
+      const groups = [];
+      rows.forEach(row => {
+        let group = groups.find(g => g.date === row.date);
+        if(!group){
+          group = { date: row.date, rows: [] };
+          groups.push(group);
+        }
+        group.rows.push(row);
+      });
+
+      const extractPlanDayLabel = (row) => {
+        const note = String(row?.note || "").trim();
+        if(!note) return "";
+        const parts = note.split("•").map(p => p.trim()).filter(Boolean);
+        const last = parts[parts.length - 1] || "";
+        if(/^اليوم\s+\d+/i.test(last) || /^الأسبوع\s+\d+\s*-\s*اليوم\s+\d+/i.test(last)) return last;
+        return "";
+      };
+
+      container.innerHTML = groups.map((group, gi) => {
+        const splitLabels = [...new Set(group.rows.map(r => SPLIT_LABEL[r.split] || r.split))];
+        const sessionType = splitLabels.length === 1 ? splitLabels[0] : "تقسيم مركب";
+        const plannedDayLabels = [...new Set(group.rows.map(extractPlanDayLabel).filter(Boolean))];
+        const dayTitle = plannedDayLabels.length === 1
+          ? plannedDayLabels[0]
+          : (plannedDayLabels.length > 1 ? "أكثر من يوم تدريبي" : `يوم تدريب ${gi + 1}`);
+        const sessionHint = splitLabels.length > 1
+          ? `التقسيم: ${splitLabels.join(" + ")}`
+          : `التقسيم: ${sessionType}`;
+
+        const tableRows = group.rows.map(r => {
+          const ex = EXERCISES.find(e => e.id === r.exId) || {name:"—", target:"—"};
+          const splitLabel = SPLIT_LABEL[r.split] || r.split;
+          const repsText = (r.reps === undefined || r.reps === null || r.reps === "") ? "—" : String(r.reps);
+          const loadText = (r.load === undefined || r.load === null || r.load === "") ? "" : String(r.load);
+          const isCardio = r.split === "cardio";
+          const doseMain = isCardio ? `${escapeHtml(repsText)} دقيقة` : escapeHtml(repsText);
+          const doseBits = [];
+          if(loadText){
+            doseBits.push(isCardio ? `الشدة: ${escapeHtml(loadText)}` : `الوزن: ${escapeHtml(loadText)} كجم`);
+          }
+          if(r.setsCount && !isCardio){
+            doseBits.push(`${escapeHtml(r.setsCount)} مجموعات`);
+          }
+          const noteHtml = r.note ? `<span class="exerciseMeta">${escapeHtml(r.note)}</span>` : "";
+          const targetHtml = ex.target ? `<span class="exerciseMeta">الاستهداف: ${escapeHtml(ex.target)}</span>` : "";
+          const doseSubHtml = doseBits.length ? `<span class="doseSub">${doseBits.join(" • ")}</span>` : "";
+
+          return `
+            <tr>
+              <td class="sectionCol">${escapeHtml(splitLabel)}</td>
+              <td>
+                <span class="exerciseName">${escapeHtml(ex.name)}</span>
+                ${targetHtml}
+                ${noteHtml}
+              </td>
+              <td>
+                <span class="doseMain">${doseMain}</span>
+                ${doseSubHtml}
+              </td>
+              <td class="actionsIconCol">
+                <div class="iconActions">
+                  <button class="iconBtn edit" type="button" title="تعديل" aria-label="تعديل" onclick="window.__editRow('${r.id}')">✎</button>
+                  <button class="iconBtn delete" type="button" title="حذف" aria-label="حذف" onclick="window.__delRow('${r.id}')">🗑</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        return `
+          <div class="logDayCard">
+            <div class="logHead">
+              <div>
+                <h4 class="logHeadTitle">${escapeHtml(dayTitle)}</h4>
+                <div class="logHeadMeta">التاريخ: ${escapeHtml(group.date)}</div>
+                <div class="logHint">${escapeHtml(sessionHint)} • ${escapeHtml(String(group.rows.length))} تمارين</div>
+              </div>
+              <span class="planBadge">${escapeHtml(sessionType)}</span>
+            </div>
+            <div class="logTableWrap">
+              <table class="logTableNice">
+                <thead>
+                  <tr>
+                    <th>القسم</th>
+                    <th>التمرين</th>
+                    <th>الجرعة</th>
+                    <th class="actionsIconCol">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>${tableRows}</tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      $("logCount").textContent = `${rows.length} سطر - ${groups.length} يوم تدريبي`;
+    }
+
+    function exportCSV(){
+      const rows = loadLog().slice().sort((a,b) => (a.date.localeCompare(b.date)) || (a.createdAt - b.createdAt));
+      const header = ["date","split","exercise","target","reps","kg","note"].join(",");
+      const lines = rows.map(r => {
+        const ex = EXERCISES.find(e=>e.id===r.exId) || {name:"", target:""};
+        const splitLabel = SPLIT_LABEL[r.split] || r.split;
+        const esc = (s) => {
+          const x = String(s ?? "");
+          return /[",\n]/.test(x) ? `"${x.replaceAll('"','""')}"` : x;
+        };
+        return [esc(r.date), esc(splitLabel), esc(ex.name), esc(ex.target), esc(r.reps), esc(r.load), esc(r.note)].join(",");
+      });
+      const csv = [header, ...lines].join("\n");
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "workout_log.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function renderLibrary(){
+      const q = $("libSearch").value.trim().toLowerCase();
+      const f = $("libSplitFilter").value;
+      const tbody = $("libTable").querySelector("tbody");
+
+      const rows = EXERCISES.filter(e => {
+        const okSplit = (f === "all") ? true : (e.split === f);
+        const okQ = !q ? true : (e.name.toLowerCase().includes(q) || e.target.toLowerCase().includes(q));
+        return okSplit && okQ;
+      });
+
+      tbody.innerHTML = rows.map(e => `
+        <tr>
+          <td>${e.name}</td>
+          <td class="muted">${e.target}</td>
+          <td>${SPLIT_LABEL[e.split] || e.split}</td>
+          <td class="muted">${e.cue}</td>
+          <td><a class="link" href="${e.yt}" target="_blank" rel="noopener">فتح</a></td>
+        </tr>
+      `).join("");
+    }
+
+    function getPlannerSelections(){
+      return Array.from(document.querySelectorAll('.plannerMuscle:checked')).map(el => el.value);
+    }
+
+    function updatePlannerSelectionState(fromAllToggle=false){
+      const allBox = $("plannerAllMuscles");
+      const checks = Array.from(document.querySelectorAll(".plannerMuscle"));
+      if(!checks.length || !allBox) return;
+
+      if(fromAllToggle){
+        checks.forEach(ch => { ch.checked = allBox.checked; });
+      }
+
+      const selected = checks.filter(ch => ch.checked).length;
+      allBox.checked = selected === checks.length;
+      allBox.indeterminate = selected > 0 && selected < checks.length;
+
+      const badge = $("plannerSelectedCount");
+      if(badge) badge.textContent = `${selected} عضلة`;
+    }
+
+    function groupExercisesForPlan(split, count, seed=0){
+      const list = EXERCISES.filter(e => e.split === split);
+      if(list.length === 0) return [];
+      const out = [];
+      const safeCount = Math.max(1, Math.min(count, list.length));
+      for(let i=0;i<safeCount;i++){
+        out.push(list[(seed + i) % list.length]);
+      }
+      return out;
+    }
+
+    function plannerPresets(level, goalStyle){
+      const levelMap = {
+        beginner: { mainSets: "3×8–12", isoSets: "2–3×10–15", cardio: "20–30 دقيقة", rest: "60–90ث" },
+        intermediate: { mainSets: "3–4×6–12", isoSets: "3–4×10–15", cardio: "25–35 دقيقة", rest: "60–120ث" },
+        advanced: { mainSets: "4–5×5–10", isoSets: "3–5×8–15", cardio: "30–40 دقيقة", rest: "60–150ث" }
+      };
+      const p = levelMap[level] || levelMap.beginner;
+      if(goalStyle === "fatloss"){
+        return { ...p, cardio: level === "advanced" ? "30–45 دقيقة" : "25–40 دقيقة", note: "أضف كارديو 2–4 مرات بالأسبوع مع عجز سعرات بسيط." };
+      }
+      if(goalStyle === "general"){
+        return { ...p, note: "ركّز على الاستمرارية والتقنية أكثر من الأوزان في البداية." };
+      }
+      return { ...p, note: "زِد الوزن أو العدّات تدريجيًا إذا حافظت على التقنية." };
+    }
+
+    function buildPlanDayHTML(dayDef, opts, seed){
+      const day = buildPlannerDayData(dayDef, opts, seed);
+      const rows = [];
+      (day.sections || []).forEach(sec => {
+        (sec.items || []).forEach(item => {
+          rows.push(`
+            <tr>
+              <td>${SPLIT_LABEL[item.split] || item.split}</td>
+              <td><b>${item.name}</b></td>
+              <td>${item.setsLabel}</td>
+            </tr>
+          `);
+        });
+      });
+
+      return `
+        <div class="planDay">
+          <div class="planDayHead">
+            <div>
+              <h4>${day.title}</h4>
+              ${day.subTitle ? `<div class="planSubTitle">${day.subTitle}</div>` : ``}
+            </div>
+            ${day.protocolLabel ? `<span class="planBadge">${day.protocolLabel}</span>` : ``}
+          </div>
+          <div class="planMeta">تقريبًا ${day.totalExercises} تمارين • راحة بين المجموعات: ${day.rest}</div>
+          <div class="planMeta">${day.warmup}</div>
+          ${day.focusText ? `<div class="planMeta">${day.focusText}</div>` : ``}
+          <table class="planTable">
+            <thead>
+              <tr>
+                <th>القسم</th>
+                <th>التمرين</th>
+                <th>الجرعة</th>
+              </tr>
+            </thead>
+            <tbody>${rows.join("")}</tbody>
+          </table>
+          <div class="planMeta" style="margin-top:8px;">${day.note}</div>
+        </div>
+      `;
+    }
+
+    function renderSavedPlanDayCard(day, index){
+      const safeTitle = escapeHtml(day?.title || `اليوم ${index + 1}`);
+      const safeSubTitle = escapeHtml(day?.subTitle || "جلسة تمرين");
+      const safeProtocol = escapeHtml(day?.protocolLabel || "");
+      const safeRest = escapeHtml(day?.rest || "");
+      const safeWarmup = escapeHtml(day?.warmup || "");
+      const safeFocusText = escapeHtml(day?.focusText || "");
+      const rows = [];
+
+      (day?.sections || []).forEach(sec => {
+        (sec?.items || []).forEach(item => {
+          rows.push(`
+            <tr>
+              <td>${escapeHtml(SPLIT_LABEL[item?.split] || item?.split || "-")}</td>
+              <td>${escapeHtml(item?.name || "-")}</td>
+              <td>${escapeHtml(item?.setsLabel || item?.noteHint || "-")}</td>
+            </tr>
+          `);
+        });
+      });
+
+      const tableHtml = rows.length
+        ? `
+          <table class="planTable">
+            <thead>
+              <tr>
+                <th>القسم</th>
+                <th>التمرين</th>
+                <th>الجرعة</th>
+              </tr>
+            </thead>
+            <tbody>${rows.join("")}</tbody>
+          </table>
+        `
+        : `<div class="planMeta">لا توجد تمارين محفوظة لهذا اليوم بعد.</div>`;
+
+      return `
+        <div class="planDay">
+          <div class="planDayHead">
+            <div>
+              <h4>${safeTitle}</h4>
+              <div class="planSubTitle">${safeSubTitle}</div>
+            </div>
+            ${safeProtocol ? `<span class="planBadge">${safeProtocol}</span>` : ""}
+          </div>
+          ${safeRest ? `<div class="planMeta">تقريبًا 45-75 دقيقة • راحة بين المجموعات: ${safeRest}</div>` : ""}
+          ${safeWarmup ? `<div class="planMeta">${safeWarmup}</div>` : ""}
+          ${safeFocusText ? `<div class="planMeta">${safeFocusText}</div>` : ""}
+          ${tableHtml}
+          <div class="planMeta" style="margin-top:8px;">يمكنك تعديل الأوزان/العدّات داخل السجل عند الحاجة.</div>
+        </div>
+      `;
+    }
+
+    function renderSavedWorkoutPlan(){
+      const host = $("tab-plan");
+      if(!host) return;
+
+      const plan = loadWorkoutPlan();
+      if(plan && Array.isArray(plan.days) && plan.days.length){
+        plannerLastPlan = plan;
+      }
+
+      const activePlan = plannerLastPlan && Array.isArray(plannerLastPlan.days) && plannerLastPlan.days.length
+        ? plannerLastPlan
+        : (plan && Array.isArray(plan?.days) && plan.days.length ? plan : null);
+
+      if(!activePlan){
+        host.innerHTML = `
+          <div class="kpi" style="margin-bottom:10px;">
+            <div class="t">لا يوجد جدول محفوظ بعد</div>
+            <div class="s">اضغط على زر <b>اقترح لي جدول تمرين</b> ثم أنشئ الجدول، وسيبقى محفوظًا هنا حتى بعد تحديث الصفحة.</div>
+          </div>
+          <div class="row2">
+            <div class="kpi">
+              <div class="t">اقتراح حجم التمرين</div>
+              <div class="s">
+                <ul style="margin:8px 0 0; padding-right:18px;">
+                  <li>كل عضلة كبيرة: 10–16 مجموعة/أسبوع حسب خبرتك وتعافيك</li>
+                  <li>عضلات صغيرة: 6–10 مجموعات/أسبوع</li>
+                  <li>التقدم يكون تدريجيًا مع الحفاظ على التقنية</li>
+                </ul>
+              </div>
+            </div>
+            <div class="kpi">
+              <div class="t">ماذا سيحدث بعد الإنشاء؟</div>
+              <div class="s">سيظهر الجدول هنا داخل بطاقات يومية، ويمكنك تحديثه لاحقًا من نافذة اقتراح الجدول.</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const periodLabels = {
+        daily: "خطة يومية",
+        weekly: "خطة أسبوعية",
+        monthly: "خطة شهرية"
+      };
+      const headLabel = periodLabels[activePlan.period] || "جدول التمارين";
+      const daysCount = Array.isArray(activePlan.days) ? activePlan.days.length : 0;
+      const cards = (activePlan.days || []).map((day, index) => renderSavedPlanDayCard(day, index)).join("");
+
+      host.innerHTML = `
+        <div class="kpi" style="margin-bottom:10px;">
+          <div class="t">${headLabel} المحفوظ</div>
+          <div class="s">تم حفظ آخر جدول أنشأته — ${daysCount} ${daysCount === 1 ? "يوم" : "أيام"}. سيبقى ظاهرًا هنا حتى بعد تحديث الصفحة أو إعادة فتح الملف.</div>
+        </div>
+        <div class="plannerOutput">${cards}</div>
+        <div class="hint" style="margin-top:10px;">لإنشاء تقسيمة جديدة أو استبدال الحالية، استخدم زر <span class="muted">اقترح لي جدول تمرين</span>.</div>
+      `;
+    }
+
+    function plannerOutputPlaceholderHTML(){
+      return `
+        <div class="kpi" style="margin-bottom:10px;">
+          <div class="t">لا يوجد جدول محفوظ بعد</div>
+          <div class="s">اضغط <b>إنشاء الجدول</b> ليتم حفظه تلقائيًا، وبعدها سيبقى ظاهرًا هنا حتى بعد تحديث الصفحة.</div>
+        </div>
+      `;
+    }
+
+    function renderPlannerOutputFromPlan(plan){
+      const host = $("plannerOutput");
+      if(!host) return;
+
+      const activePlan = plan && Array.isArray(plan.days) && plan.days.length ? plan : null;
+      if(!activePlan){
+        host.innerHTML = plannerOutputPlaceholderHTML();
+        return;
+      }
+
+      plannerLastPlan = activePlan;
+
+      const goalLabels = {
+        hypertrophy: "تضخيم / بناء عضل",
+        fatloss: "تنشيف / حرق دهون",
+        general: "لياقة عامة"
+      };
+      const levelLabels = {
+        beginner: "مبتدئ",
+        intermediate: "متوسط",
+        advanced: "متقدم"
+      };
+      const periodLabels = {
+        daily: "خطة يومية",
+        weekly: "خطة أسبوعية",
+        monthly: "خطة شهرية"
+      };
+
+      const meta = activePlan.meta || {};
+      const cards = (activePlan.days || []).map((day, index) => renderSavedPlanDayCard(day, index)).join("");
+      const summaryBits = [];
+      if(meta.protocol) summaryBits.push(meta.protocol);
+      if(meta.daysPerWeek) summaryBits.push(`${meta.daysPerWeek} أيام/أسبوع`);
+      if(meta.goalStyle && goalLabels[meta.goalStyle]) summaryBits.push(goalLabels[meta.goalStyle]);
+      if(meta.level && levelLabels[meta.level]) summaryBits.push(`المستوى: ${levelLabels[meta.level]}`);
+      if(Array.isArray(meta.selectedSplits) && meta.selectedSplits.length && meta.selectedSplits.length < 8){
+        summaryBits.push(`التركيز: ${meta.selectedSplits.map(s => SPLIT_LABEL[s] || s).join(" + ")}`);
+      }
+
+      host.innerHTML = `
+        <div class="kpi" style="margin-bottom:10px;">
+          <div class="t">${periodLabels[activePlan.period] || "جدول التمارين"} الحالي</div>
+          <div class="s">${summaryBits.length ? summaryBits.join(" • ") : "هذا آخر جدول تم حفظه."}</div>
+        </div>
+        <div class="plannerOutput">${cards}</div>
+      `;
+    }
+
+    function restorePlannerOutputFromSavedPlan(){
+      const savedPlan = loadWorkoutPlan();
+      if(savedPlan && Array.isArray(savedPlan.days) && savedPlan.days.length){
+        plannerLastPlan = savedPlan;
+        renderPlannerOutputFromPlan(savedPlan);
+        return;
+      }
+      renderPlannerOutputFromPlan(null);
+    }
+
+    function generatePlannerHTML(opts){
+      const protocolPack = plannerProtocolTemplate(opts.daysPerWeek);
+      const selected = opts.selectedSplits || [];
+      const focusHint = selected.length
+        ? `<div class="planMeta" style="margin-bottom:8px;">تركيزك المختار: ${selected.map(s => SPLIT_LABEL[s] || s).join(" + ")}.</div>`
+        : `<div class="planMeta" style="margin-bottom:8px;">لم يتم اختيار عضلات محددة، لذلك سيتم عرض التقسيمة القياسية كاملة.</div>`;
+      let htmlOut = focusHint;
+
+      if(opts.period === "daily"){
+        const dayDef = { ...protocolPack.days[0], protocolLabel: protocolPack.protocol };
+        htmlOut += `<div class="planMeta" style="margin-bottom:8px;">خطة اليوم مبنية على تقسيمة ${protocolPack.protocol}.</div>`;
+        htmlOut += buildPlanDayHTML(dayDef, opts, 0);
+        return htmlOut;
+      }
+
+      if(opts.period === "weekly"){
+        htmlOut += `<div class="planMeta" style="margin-bottom:8px;">خطة أسبوعية • ${protocolPack.days.length} أيام تمرين • ${protocolPack.protocol}</div>`;
+        protocolPack.days.forEach((dayDef, i) => {
+          htmlOut += buildPlanDayHTML({ ...dayDef, protocolLabel: protocolPack.protocol }, opts, i * 3);
+        });
+        htmlOut += `<div class="hint" style="margin-top:10px;">الأيام غير الموضوعة تعتبر راحة/مشي خفيف/إطالة حسب التعافي.</div>`;
+        return htmlOut;
+      }
+
+      const weekNotes = [
+        "الأسبوع 1: ابدأ بوزن مريح واترك 2 عدة في الخزان (RIR 2).",
+        "الأسبوع 2: زد عدة واحدة أو وزنًا بسيطًا (2.5–5%).",
+        "الأسبوع 3: حافظ على الزيادة أو أضف مجموعة إضافية لعضلة تحتاج تركيز.",
+        "الأسبوع 4: خفف الحجم 20–30% (Deload خفيف) إذا شعرت بإجهاد."
+      ];
+      htmlOut += `<div class="planMeta" style="margin-bottom:8px;">خطة شهرية (4 أسابيع) • ${protocolPack.protocol}</div>`;
+      for(let w=0; w<4; w++){
+        htmlOut += `<div class="planDay"><h4>الأسبوع ${w+1}</h4><div class="planMeta">${weekNotes[w]}</div>`;
+        protocolPack.days.forEach((dayDef, i) => {
+          htmlOut += `<div style="margin-top:8px;">${buildPlanDayHTML({ ...dayDef, title: `الأسبوع ${w+1} - ${dayDef.title}`, protocolLabel: protocolPack.protocol }, opts, (w * 5) + (i * 3))}</div>`;
+        });
+        htmlOut += `</div>`;
+      }
+      return htmlOut;
+    }
+
+    function copyPlannerOutput(){
+      const out = $("plannerOutput");
+      if(!out) return;
+      const text = out.innerText.trim();
+      if(!text) return;
+      navigator.clipboard?.writeText(text)
+        .then(() => alert("تم نسخ الجدول ✅"))
+        .catch(() => alert("تعذر النسخ تلقائياً، انسخه يدويًا."));
+    }
+
+    window.addEventListener("beforeunload", () => {
+      try{
+        const currentRows = readJSON(logKey(), null);
+        const fallbackRows = readJSON(logFallbackKey(), []);
+        const safeRows = Array.isArray(currentRows) && currentRows.length
+          ? currentRows
+          : (Array.isArray(fallbackRows) ? fallbackRows : []);
+        writeJSON(logFallbackKey(), safeRows);
+
+        if(isWorkoutPlanValid(plannerLastPlan)){
+          writeJSON(workoutPlanKey(), plannerLastPlan);
+          writeJSON(workoutPlanFallbackKey(), plannerLastPlan);
+        }
+      }catch(_e){}
+    });
+
+
+    function setTab(tab){
+      const tabs = ["log","plan","library","tips"];
+      const safeTab = tabs.includes(tab) ? tab : "log";
+      tabs.forEach(t => $("tab-"+t).style.display = (t===safeTab) ? "block" : "none");
+      document.querySelectorAll(".tab").forEach(el => el.classList.toggle("active", el.dataset.tab === safeTab));
+      try{ localStorage.setItem("fit_last_workout_tab_v1", safeTab); }catch(_e){}
+      if(safeTab === "library") renderLibrary();
+      if(safeTab === "tips") updateAdvice();
+    }
+
+    async function init(){
+      $("dateInput").value = todayISO();
+      updatePlannerSelectionState(false);
+
+      // Render local (guest) state first (app hidden until login)
+      fillProfileForm(loadProfile());
+      calcAndRender();
+      setMainVisibility(false);
+      setProfileEditor(true);
+
+      await initFirebaseServices();
+
+      if(!cloud.enabled || !cloud.auth){
+        setPillMessage("authMsg", "تعذر تهيئة Firebase/Auth. راجع إعدادات المشروع أو حدّث الصفحة.", true);
+      }
+
+      if(cloud.enabled && cloud.auth){
+        onAuthStateChanged(cloud.auth, async (user) => {
+          if(user){
+            cloud.user = user;
+            cloud.docRef = doc(cloud.db, "fitness_app_users", user.uid);
+
+            refreshUserBadge();
+            setMainVisibility(true);
+
+            try{
+              await loadFromCloudForUser(user);
+
+              fillProfileForm(loadProfile());
+              calcAndRender();
+              setExerciseOptions();
+              renderLog();
+              renderSavedWorkoutPlan();
+              restorePlannerOutputFromSavedPlan();
+              renderLibrary();
+              updateAdvice();
+              try{ setTab(localStorage.getItem("fit_last_workout_tab_v1") || "log"); }catch(_e){ setTab("log"); }
+            }catch(err){
+              console.warn("Post-login render failed:", err);
+            }
+
+            const complete = isProfileComplete(loadProfile());
+            const storedEditorState = readStoredProfileEditorState();
+            setProfileEditor(complete ? (storedEditorState === true) : true);
+            try{
+              if(typeof window.__refreshCardsHomeAfterProfileLoad === "function") window.__refreshCardsHomeAfterProfileLoad();
+            }catch(_e){}
+            updateSaveState();
+          }else{
+            cloud.user = null;
+            cloud.docRef = null;
+            cloud.status = "local";
+            refreshUserBadge();
+            setMainVisibility(false);
+            setProfileEditor(true);
+            updateSaveState();
+          }
+        });
+      }else{
+        // Fallback local-only
+        setMainVisibility(true);
+        $("userBar").hidden = true;
+        const complete = isProfileComplete(loadProfile());
+        setProfileEditor(!complete);
+        renderSavedWorkoutPlan();
+        restorePlannerOutputFromSavedPlan();
+      }
+
+      // Continue normal setup (tabs/etc.)
+
+      setExerciseOptions();
+      updateLogInputsForGroup();
+      renderLog();
+      renderSavedWorkoutPlan();
+      restorePlannerOutputFromSavedPlan();
+      renderLibrary();
+      updateAdvice();
+      try{ setTab(localStorage.getItem("fit_last_workout_tab_v1") || "log"); }catch(_e){ setTab("log"); }
+
+      $("calcBtn").addEventListener("click", calcAndRender);
+
+      $("saveBtn").addEventListener("click", () => {
+        const p = readProfileForm();
+        saveProfile(p);
+        calcAndRender();
+
+        const complete = isProfileComplete(p);
+        if(complete){
+          setProfileEditor(false);
+          try{
+            if(typeof window.__showHomeHub === "function") window.__showHomeHub();
+          }catch(_e){}
+        }else{
+          setProfileEditor(true);
+          try{
+            if(typeof window.__openHomeDetail === "function") window.__openHomeDetail("daily");
+          }catch(_e){}
+        }
+
+        updateSaveState(complete ? "تم الحفظ ✅" : "تم الحفظ (أكمل البيانات المطلوبة)");
+        setTimeout(()=> updateSaveState(), 1600);
+      });
+
+      $("resetBtn").addEventListener("click", () => {
+        if(!confirm("سيتم مسح بياناتك وسجل التمارين للحساب الحالي. هل أنت متأكد؟")) return;
+        clearCurrentLocalData();
+        scheduleCloudSync();
+        fillProfileForm({});
+        calcAndRender();
+        renderLog();
+        renderSavedWorkoutPlan();
+        restorePlannerOutputFromSavedPlan();
+        renderLibrary();
+        setProfileEditor(true);
+        try{
+          if(typeof window.__openHomeDetail === "function") window.__openHomeDetail("daily");
+        }catch(_e){}
+        updateSaveState("تم المسح");
+        setTimeout(()=> updateSaveState(), 1600);
+      });
+
+      ["sex","age","height","weight","activity","goal","cardioPref"].forEach(id => $(id).addEventListener("change", calcAndRender));
+
+      $("daySelect").addEventListener("change", () => {
+        setExerciseOptions();
+        updateLogInputsForGroup();
+        renderLibrary();
+      });
+
+      $("addSetBtn").addEventListener("click", addLogRow);
+      $("btnCancelEdit")?.addEventListener("click", cancelLogEdit);
+      $("exportBtn").addEventListener("click", exportCSV);
+      $("clearLogBtn").addEventListener("click", () => {
+        if(!confirm("مسح سجل التمارين بالكامل؟")) return;
+        saveLog([]);
+        renderLog();
+        updateSaveState("تم تحديث السجل");
+        setTimeout(()=> updateSaveState(), 1200);
+      });
+
+      // Planner modal (optional workout schedule generator)
+      const openPlanner = () => {
+        updatePlannerSelectionState(false);
+        restorePlannerOutputFromSavedPlan();
+        $("plannerModal").hidden = false;
+      };
+      const closePlanner = () => { $("plannerModal").hidden = true; };
+
+      $("btnPlannerModal")?.addEventListener("click", openPlanner);
+      $("btnClosePlanner")?.addEventListener("click", closePlanner);
+      $("plannerModal")?.addEventListener("click", (e) => { if(e.target === $("plannerModal")) closePlanner(); });
+
+      $("plannerAllMuscles")?.addEventListener("change", () => updatePlannerSelectionState(true));
+      document.querySelectorAll(".plannerMuscle").forEach(el => {
+        el.addEventListener("change", () => updatePlannerSelectionState(false));
+      });
+
+      $("btnGeneratePlanner")?.addEventListener("click", () => {
+        const selectedSplits = getPlannerSelections();
+        updatePlannerSelectionState(false);
+        const plannerOpts = {
+          selectedSplits,
+          period: $("plannerPeriod").value,
+          daysPerWeek: Number($("plannerDaysPerWeek").value || 4),
+          goalStyle: $("plannerGoalStyle").value,
+          level: $("plannerLevel").value
+        };
+        plannerLastPlan = generatePlannerData(plannerOpts);
+        saveWorkoutPlan(plannerLastPlan);
+        renderSavedWorkoutPlan();
+        renderPlannerOutputFromPlan(plannerLastPlan);
+        updateSaveState("تم حفظ جدول التمارين ✅");
+        setTimeout(() => updateSaveState(), 1200);
+      });
+
+      $("btnCopyPlanner")?.addEventListener("click", copyPlannerOutput);
+      $("btnAddPlannerToLog")?.addEventListener("click", addPlannerToLog);
+
+      document.querySelectorAll(".tab").forEach(el => el.addEventListener("click", ()=> setTab(el.dataset.tab)));
+
+      $("libSearch").addEventListener("input", renderLibrary);
+      $("libSplitFilter").addEventListener("change", renderLibrary);
+
+      // Auth buttons
+      $("btnRegister").addEventListener("click", async () => {
+        if(!cloud.auth){
+          setPillMessage("authMsg", "خدمة تسجيل الدخول غير جاهزة حالياً. حدّث الصفحة ثم جرّب مرة أخرى.", true);
+          return;
+        }
+        try{
+          const email = $("authEmail").value.trim();
+          const pass = $("authPassword").value;
+          if(!email || !pass){
+            setPillMessage("authMsg", "أدخل البريد الإلكتروني وكلمة المرور.", true);
+            return;
+          }
+          setPillMessage("authMsg", "جاري إنشاء الحساب…");
+          await createUserWithEmailAndPassword(cloud.auth, email, pass);
+          setPillMessage("authMsg", "تم إنشاء الحساب ✅");
+        }catch(err){
+          setPillMessage("authMsg", authErrorText(err), true);
+        }
+      });
+
+      $("btnLogin").addEventListener("click", async () => {
+        if(!cloud.auth){
+          setPillMessage("authMsg", "خدمة تسجيل الدخول غير جاهزة حالياً. حدّث الصفحة ثم جرّب مرة أخرى.", true);
+          return;
+        }
+        try{
+          const email = $("authEmail").value.trim();
+          const pass = $("authPassword").value;
+          if(!email || !pass){
+            setPillMessage("authMsg", "أدخل البريد الإلكتروني وكلمة المرور.", true);
+            return;
+          }
+          setPillMessage("authMsg", "جاري تسجيل الدخول…");
+          await signInWithEmailAndPassword(cloud.auth, email, pass);
+          setPillMessage("authMsg", "تم تسجيل الدخول ✅");
+        }catch(err){
+          setPillMessage("authMsg", authErrorText(err), true);
+        }
+      });
+
+      $("btnForgot").addEventListener("click", async () => {
+        if(!cloud.auth){
+          setPillMessage("authMsg", "خدمة استعادة كلمة المرور غير جاهزة حالياً.", true);
+          return;
+        }
+        try{
+          const email = $("authEmail").value.trim();
+          if(!email){
+            setPillMessage("authMsg", "اكتب بريدك الإلكتروني أولاً لإرسال رابط إعادة التعيين.", true);
+            return;
+          }
+          await sendPasswordResetEmail(cloud.auth, email);
+          setPillMessage("authMsg", "تم إرسال رابط إعادة تعيين كلمة المرور ✅");
+        }catch(err){
+          setPillMessage("authMsg", authErrorText(err), true);
+        }
+      });
+
+      $("authPassword").addEventListener("keydown", (e) => {
+        if(e.key === "Enter") $("btnLogin").click();
+      });
+
+      $("btnLogout").addEventListener("click", async () => {
+        if(!cloud.auth){
+          setPillMessage("authMsg", "خدمة تسجيل الخروج غير جاهزة حالياً.", true);
+          return;
+        }
+        try{ await signOut(cloud.auth); }catch(err){ alert(authErrorText(err)); }
+      });
+
+      $("btnEditProfile").addEventListener("click", () => {
+        try{
+          if(typeof window.__openHomeDetail === "function"){
+            window.__openHomeDetail("daily");
+          }
+        }catch(_e){}
+        setProfileEditor(true);
+        setTimeout(() => {
+          $("profileFormSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 60);
+      });
+
+      // Account modal
+      const openAccount = () => {
+        if(!cloud.user){
+          setPillMessage("authMsg", "سجّل الدخول أولاً.", true);
+          return;
+        }
+        $("accDisplayName").value = cloud.user.displayName || "";
+        $("accPhotoUrl").value = cloud.user.photoURL || "";
+        setPillMessage("accountMsg", "");
+        $("accountModal").hidden = false;
+      };
+      const closeAccount = () => { $("accountModal").hidden = true; };
+
+      $("btnAccount").addEventListener("click", openAccount);
+      $("btnCloseAccount").addEventListener("click", closeAccount);
+      $("accountModal").addEventListener("click", (e) => { if(e.target === $("accountModal")) closeAccount(); });
+
+      $("btnSaveAccount").addEventListener("click", async () => {
+        try{
+          if(!cloud.user) return;
+          const dn = $("accDisplayName").value.trim();
+          const pu = $("accPhotoUrl").value.trim();
+          await updateProfile(cloud.user, { displayName: dn || null, photoURL: pu || null });
+          refreshUserBadge();
+          setPillMessage("accountMsg", "تم حفظ بيانات الحساب ✅");
+        }catch(err){
+          setPillMessage("accountMsg", authErrorText(err), true);
+        }
+      });
+
+      $("btnVerifyEmail").addEventListener("click", async () => {
+        try{
+          if(!cloud.user) return;
+          await sendEmailVerification(cloud.user);
+          setPillMessage("accountMsg", "تم إرسال رابط تأكيد البريد ✅");
+        }catch(err){
+          setPillMessage("accountMsg", authErrorText(err), true);
+        }
+      });
+
+      $("btnResetPasswordEmail").addEventListener("click", async () => {
+        try{
+          if(!cloud.auth) return;
+          const email = cloud.user?.email || $("authEmail").value.trim();
+          if(!email){
+            setPillMessage("accountMsg", "لا يوجد بريد لإرسال الرابط.", true);
+            return;
+          }
+          await sendPasswordResetEmail(cloud.auth, email);
+          setPillMessage("accountMsg", "تم إرسال رابط إعادة التعيين ✅");
+        }catch(err){
+          setPillMessage("accountMsg", authErrorText(err), true);
+        }
+      });
+
+      $("btnChangePassword").addEventListener("click", async () => {
+        try{
+          if(!cloud.user) return;
+          const currentPass = $("accCurrentPass").value;
+          const newPass = $("accNewPass").value;
+          if(!currentPass || !newPass){
+            setPillMessage("accountMsg", "اكتب كلمة المرور الحالية والجديدة.", true);
+            return;
+          }
+          const cred = EmailAuthProvider.credential(cloud.user.email, currentPass);
+          await reauthenticateWithCredential(cloud.user, cred);
+          await updatePassword(cloud.user, newPass);
+          $("accCurrentPass").value = "";
+          $("accNewPass").value = "";
+          setPillMessage("accountMsg", "تم تغيير كلمة المرور ✅");
+        }catch(err){
+          setPillMessage("accountMsg", authErrorText(err), true);
+        }
+      });
+
+      window.__delRow = deleteLogRow;
+      window.__editRow = startEditLogRow;
+    }
+
+    // Expose selected app helpers for the non-module home enhancer script.
+    window.__fitnessAppBridge = {
+      FOOD_LIBRARY,
+      FOOD_CATEGORY_LABEL,
+      loadDietPrefs,
+      saveDietPrefs,
+      buildDietChoicePlanHTML,
+      isProfileCompleteNow: () => {
+        try{ return isProfileComplete(loadProfile()); }catch(_e){ return false; }
+      },
+      openDailySetupFlow: () => {
+        try{
+          if(typeof window.__openHomeDetail === "function") window.__openHomeDetail("daily");
+        }catch(_e){}
+        try{ setProfileEditor(true); }catch(_e){}
+      },
+      setProfileEditorState: (show) => {
+        try{ setProfileEditor(!!show); }catch(_e){}
+      },
+      setProfileEditorUI: (show) => {
+        try{ setProfileEditor(!!show, { persist:false }); }catch(_e){}
+      },
+      readProfileEditorState: () => {
+        try{ return readStoredProfileEditorState(); }catch(_e){ return null; }
+      },
+      goHomeHub: () => {
+        try{
+          if(typeof window.__showHomeHub === "function") window.__showHomeHub();
+        }catch(_e){}
+      }
+    };
+
+    init();
+  </script>
+
+  <script id="cardsHomeEnhancer">
+    (function(){
+      function ready(fn){
+        if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, {once:true});
+        else fn();
+      }
+      ready(function(){
+        const bridge = window.__fitnessAppBridge || {};
+        const FOOD_LIBRARY = Array.isArray(bridge.FOOD_LIBRARY) ? bridge.FOOD_LIBRARY : [];
+        const FOOD_CATEGORY_LABEL = bridge.FOOD_CATEGORY_LABEL || {};
+        const loadDietPrefs = typeof bridge.loadDietPrefs === 'function' ? bridge.loadDietPrefs : (() => ({ selected: [], updatedAtClient: 0 }));
+        const saveDietPrefs = typeof bridge.saveDietPrefs === 'function' ? bridge.saveDietPrefs : (() => {});
+        const buildDietChoicePlanHTML = typeof bridge.buildDietChoicePlanHTML === 'function'
+          ? bridge.buildDietChoicePlanHTML
+          : (() => '<span class="muted">احسب بياناتك أولاً ثم اختر الأطعمة المناسبة لك.</span>');
+        const isProfileCompleteNow = typeof bridge.isProfileCompleteNow === 'function'
+          ? bridge.isProfileCompleteNow
+          : (() => {
+              const age = Number(document.getElementById('age')?.value || 0);
+              const height = Number(document.getElementById('height')?.value || 0);
+              const weight = Number(document.getElementById('weight')?.value || 0);
+              return age > 0 && height > 0 && weight > 0;
+            });
+        const setProfileEditorState = typeof bridge.setProfileEditorState === 'function'
+          ? bridge.setProfileEditorState
+          : (() => {});
+        const setProfileEditorUI = typeof bridge.setProfileEditorUI === 'function'
+          ? bridge.setProfileEditorUI
+          : ((show) => {
+              try{ setProfileEditorState(!!show); }catch(_e){}
+            });
+        const readProfileEditorState = typeof bridge.readProfileEditorState === 'function'
+          ? bridge.readProfileEditorState
+          : (() => null);
+        function deriveProfileEditorState(){
+          const complete = isProfileCompleteNow();
+          if(!complete) return true;
+          const saved = readProfileEditorState();
+          return saved === true;
+        }
+        let profileEditorForced = deriveProfileEditorState();
+        function applyProfileEditorUI(show){
+          profileEditorForced = !!show;
+          try{ setProfileEditorUI(!!show); }catch(_e){}
+        }
+        function syncProfileEditorState(show){
+          profileEditorForced = !!show;
+          try{ setProfileEditorState(!!show); }catch(_e){}
+        }
+
+        const VIEW_STATE_KEY = 'fit_last_detail_view_v1';
+        function saveLastViewState(mode){
+          try{ localStorage.setItem(VIEW_STATE_KEY, String(mode || 'home')); }catch(_e){}
+        }
+        function readLastViewState(){
+          try{ return localStorage.getItem(VIEW_STATE_KEY) || ''; }catch(_e){ return ''; }
+        }
+
+        const appMain = document.getElementById('appMain');
+        if(!appMain) return;
+
+        const homeHub = document.getElementById('homeHub');
+        const detailShell = document.getElementById('detailShell');
+        const detailViews = document.getElementById('detailViews');
+        const detailTitle = document.getElementById('detailTitle');
+        const backBtn = document.getElementById('detailBackBtn');
+
+        const cards = appMain.querySelectorAll(':scope > section.card');
+        const dailyCard = cards[0] || null;
+        const workoutCard = cards[1] || null;
+        if(!dailyCard || !workoutCard) return;
+
+        appMain.classList.add('cardsHomeEnabled');
+        dailyCard.id = 'dailyDetailCard';
+        workoutCard.id = 'workoutDetailCard';
+
+        // Move existing sections into detail container
+        detailViews.appendChild(dailyCard);
+        detailViews.appendChild(workoutCard);
+
+        // Build diet detail card (mirrors meal plan + summary)
+        const dietCard = document.createElement('section');
+        dietCard.className = 'card dietCard';
+        dietCard.id = 'dietDetailCard';
+        dietCard.hidden = true;
+        dietCard.innerHTML = `
+          <div class="hd">
+            <h2>الخطة الغذائية</h2>
+            <span class="pill">تفاصيل الخطة</span>
+          </div>
+          <div class="bd">
+            <div class="hint" id="dietIntro">هذه الخطة تُبنى تلقائياً بعد حساب الاحتياج اليومي، ويمكنك كذلك اختيار الأطعمة المناسبة لك وحفظها.</div>
+
+            <div class="foodPickerWrap">
+              <div class="foodPickerHead">
+                <div>
+                  <div class="title">اختر الأطعمة المناسبة لك</div>
+                  <div class="subtxt">حدد الأصناف التي تناسبك، وسترى لكل صنف سعراته وبروتينه بشكل واضح، مع اقتراح يومي قابل للتطبيق. يمكنك العودة وتعديلها لاحقاً.</div>
+                </div>
+                <button class="secondary foodPickerToggle" id="btnToggleFoodPicker" type="button">إخفاء القائمة</button>
+              </div>
+              <div class="foodSummary" id="foodPickSummary">لم يتم حفظ أطعمة بعد.</div>
+              <div class="foodSavedActions" id="foodSavedActions" hidden>
+                <button id="btnNextDietVariant" type="button">جدول آخر</button>
+              </div>
+              <div class="foodPickerPanel" id="foodPickerPanel">
+                <div class="foodSearch">
+                  <label>ابحث عن طعام</label>
+                  <input id="foodSearchInput" type="text" placeholder="مثال: تونة / خبز / بيض / لحم..." />
+                </div>
+                <div class="foodGroups" id="foodGroups"></div>
+                <div class="foodPickerActions">
+                  <button id="btnSaveFoodPrefs" type="button">حفظ اختيارات الأطعمة</button>
+                  <button class="secondary" id="btnClearFoodPrefs" type="button">تصفير الاختيارات</button>
+                </div>
+              </div>
+              <div class="dietChoicePlan" id="dietChoicePlanMirror">اختر من القائمة بالأعلى الأطعمة التي تناسبك، ثم اضغط "حفظ اختيارات الأطعمة".</div>
+            </div>
+
+            <div class="dietTop">
+              <div class="dietMini">
+                <div class="t">السعرات المقترحة</div>
+                <div class="v" id="dietCalMirror">—</div>
+                <div class="s" id="dietCalNoteMirror">—</div>
+              </div>
+              <div class="dietMini">
+                <div class="t">البروتين المقترح</div>
+                <div class="v" id="dietProMirror">—</div>
+                <div class="s" id="dietProNoteMirror">—</div>
+              </div>
+            </div>
+          </div>`;
+        detailViews.appendChild(dietCard);
+
+        const dailyBody = dailyCard.querySelector('.bd');
+        const dailyFooter = dailyCard.querySelector('.footer');
+
+        function setMainMode(forceMode){
+          if(appMain.hidden) return;
+
+          if(forceMode === 'home'){
+            showHome();
+            return;
+          }
+          if(forceMode === 'daily'){
+            openDetail('daily');
+            return;
+          }
+
+          profileEditorForced = deriveProfileEditorState();
+
+          // Hide default detail cards until user opens one
+          if(!detailShell.hidden || !homeHub.hidden) return;
+
+          const complete = isProfileCompleteNow();
+          const lastView = readLastViewState();
+
+          if(!complete){
+            openDetail('daily');
+            return;
+          }
+
+          if(lastView === 'diet' || lastView === 'workout'){
+            openDetail(lastView);
+            return;
+          }
+
+          if(lastView === 'daily'){
+            if(profileEditorForced){
+              openDetail('daily');
+            }else{
+              showHome();
+            }
+            return;
+          }
+
+          showHome();
+        }
+
+        function showHome(){
+          saveLastViewState('home');
+          homeHub.hidden = false;
+          detailShell.hidden = true;
+          dailyCard.hidden = true;
+          workoutCard.hidden = true;
+          dietCard.hidden = true;
+          // Restore full daily card for next open
+          if(dailyBody) dailyBody.hidden = false;
+          if(dailyFooter) dailyFooter.hidden = false;
+        }
+
+        function openDetail(kind){
+          const safeKind = (kind === 'daily' || kind === 'diet' || kind === 'workout') ? kind : 'daily';
+          saveLastViewState(safeKind);
+
+          homeHub.hidden = true;
+          detailShell.hidden = false;
+          dailyCard.hidden = true;
+          workoutCard.hidden = true;
+          dietCard.hidden = true;
+
+          if(safeKind === 'daily'){
+            const shouldShowEditor = !isProfileCompleteNow() || profileEditorForced;
+            applyProfileEditorUI(shouldShowEditor);
+            detailTitle.textContent = 'الاحتياج اليومي + الحسبة';
+            dailyCard.hidden = false;
+            if(dailyBody) dailyBody.hidden = false;
+            if(dailyFooter) dailyFooter.hidden = true; // keep focus on calculations
+          } else if(safeKind === 'diet'){
+            detailTitle.textContent = 'الخطة الغذائية';
+            dietCard.hidden = false;
+            initFoodPickerUI();
+          } else {
+            detailTitle.textContent = 'التمارين';
+            workoutCard.hidden = false;
+            try{ setTab(localStorage.getItem("fit_last_workout_tab_v1") || "log"); }catch(_e){ setTab("log"); }
+          }
+          window.scrollTo({top:0, behavior:'smooth'});
+        }
+
+        function syncMainModeAfterProfileLoad(){
+          profileEditorForced = deriveProfileEditorState();
+          const complete = isProfileCompleteNow();
+          const lastView = readLastViewState();
+
+          if(!complete){
+            openDetail('daily');
+            return;
+          }
+
+          if(lastView === 'diet' || lastView === 'workout'){
+            openDetail(lastView);
+            return;
+          }
+
+          if(lastView === 'daily'){
+            if(profileEditorForced) openDetail('daily');
+            else showHome();
+            return;
+          }
+
+          showHome();
+        }
+
+        window.__openHomeDetail = openDetail;
+        window.__showHomeHub = showHome;
+        window.__refreshCardsHomeAfterProfileLoad = syncMainModeAfterProfileLoad;
+
+        backBtn.addEventListener('click', showHome);
+        homeHub.querySelectorAll('.homeCard').forEach(c => c.addEventListener('click', () => openDetail(c.dataset.open)));
+
+        const saveProfileBtn = document.getElementById('saveBtn');
+        if(saveProfileBtn){
+          saveProfileBtn.addEventListener('click', () => {
+            setTimeout(() => {
+              const complete = isProfileCompleteNow();
+              syncProfileEditorState(!complete);
+              if(complete) showHome();
+              else openDetail('daily');
+            }, 80);
+          });
+        }
+
+        const editProfileBtn = document.getElementById('btnEditProfile');
+        if(editProfileBtn){
+          editProfileBtn.addEventListener('click', () => {
+            syncProfileEditorState(true);
+            setTimeout(() => openDetail('daily'), 20);
+          });
+        }
+
+        const resetProfileBtn = document.getElementById('resetBtn');
+        if(resetProfileBtn){
+          resetProfileBtn.addEventListener('click', () => {
+            syncProfileEditorState(true);
+            setTimeout(() => openDetail('daily'), 80);
+          });
+        }
+
+        // Greeting in header (insert once under subtitle)
+        const headerSub = document.querySelector('header .sub');
+        if(headerSub && !document.getElementById('headerGreetingLine')){
+          const g = document.createElement('div');
+          g.id = 'headerGreetingLine';
+          g.className = 'pill';
+          g.style.marginTop = '8px';
+          g.style.width = 'fit-content';
+          g.textContent = 'مرحبًا 👋';
+          headerSub.insertAdjacentElement('afterend', g);
+        }
+
+        function normalizeName(v){
+          if(!v) return 'صديقنا';
+          const s = String(v).trim();
+          if(!s) return 'صديقنا';
+          // Keep the full entered name (e.g., "أبو جمال") for the main greeting.
+          if(s.includes('@')) return s.split('@')[0];
+          return s;
+        }
+
+
+        let foodDraftSelection = [];
+        let foodPickerExpanded = true;
+
+        function getSavedFoodSelection(){
+          const raw = loadDietPrefs();
+          const selected = Array.isArray(raw?.selected) ? raw.selected.filter(id => FOOD_LIBRARY.some(item => item.id === id)) : [];
+          return [...new Set(selected)];
+        }
+
+        function setFoodPickerExpanded(expanded){
+          foodPickerExpanded = !!expanded;
+          const savedCount = getSavedFoodSelection().length;
+          const panel = document.getElementById('foodPickerPanel');
+          const btn = document.getElementById('btnToggleFoodPicker');
+          const savedActions = document.getElementById('foodSavedActions');
+          if(panel) panel.hidden = !foodPickerExpanded;
+          if(savedActions) savedActions.hidden = !(savedCount && !foodPickerExpanded);
+          if(btn){
+            if(foodPickerExpanded) btn.textContent = savedCount ? 'إخفاء التعديل' : 'إخفاء القائمة';
+            else btn.textContent = savedCount ? 'تعديل الأصناف' : 'إظهار القائمة';
+          }
+        }
+
+        function renderFoodPicker(filterText=''){
+          const wrap = document.getElementById('foodGroups');
+          if(!wrap) return;
+
+          const q = String(filterText || '').trim().toLowerCase();
+          const filtered = FOOD_LIBRARY.filter(item => {
+            if(!q) return true;
+            const hay = `${item.name} ${item.serving || ''} ${FOOD_CATEGORY_LABEL[item.cat] || ''}`.toLowerCase();
+            return hay.includes(q);
+          });
+
+          if(!filtered.length){
+            wrap.innerHTML = '<div class="foodGroup" style="grid-column:1 / -1;"><div class="muted">لا توجد نتائج مطابقة. جرّب كلمة أبسط.</div></div>';
+            return;
+          }
+
+          const grouped = {};
+          filtered.forEach(item => {
+            if(!grouped[item.cat]) grouped[item.cat] = [];
+            grouped[item.cat].push(item);
+          });
+
+          const fmtProtein = (n) => Number.isInteger(n) ? `${n}` : `${n}`;
+          const order = ['protein','carbs','dairy','fruits','veggies','fats'];
+          wrap.innerHTML = order.filter(cat => grouped[cat]?.length).map(cat => `
+            <section class="foodGroup">
+              <h4>${FOOD_CATEGORY_LABEL[cat] || cat}</h4>
+              <div class="foodChips">
+                ${grouped[cat].map(item => `
+                  <button type="button" class="foodChip ${foodDraftSelection.includes(item.id) ? 'active' : ''}" data-food-id="${item.id}">
+                    <span class="foodChipName">${item.name}</span>
+                    <span class="foodChipMeta">${item.serving || 'حصة'} • ${item.kcal || 0} سعرة • ${fmtProtein(item.protein || 0)} جم بروتين</span>
+                  </button>
+                `).join('')}
+              </div>
+            </section>
+          `).join('');
+        }
+
+        function refreshFoodSummary(){
+          const summary = document.getElementById('foodPickSummary');
+          const plan = document.getElementById('dietChoicePlanMirror');
+          if(!summary || !plan) return;
+
+          const saved = getSavedFoodSelection();
+          const draftChanged = JSON.stringify([...foodDraftSelection].sort()) !== JSON.stringify([...saved].sort());
+          const selectedItems = foodDraftSelection.map(id => FOOD_LIBRARY.find(item => item.id === id)).filter(Boolean);
+          const totalKcal = selectedItems.reduce((sum, item) => sum + (Number(item.kcal) || 0), 0);
+          const totalProtein = Math.round(selectedItems.reduce((sum, item) => sum + (Number(item.protein) || 0), 0) * 10) / 10;
+
+          if(!selectedItems.length){
+            summary.innerHTML = '<strong>ابدأ اختيارك:</strong> اختر من كل مجموعة ما يناسبك، ثم احفظها ليُبنى لك جدول 7 أيام ويختفي اختيار الأصناف حتى تحتاج لتعديله.';
+          }else if(draftChanged){
+            summary.innerHTML = `<strong>${selectedItems.length} صنفًا محددًا</strong> (لم يتم الحفظ بعد)<br><span class="muted">إجمالي اختياراتك الحالية: ${totalKcal} سعرة • ${totalProtein} جم بروتين</span><br><span class="muted">احفظ الاختيارات ليُحدَّث جدول الـ 7 أيام ثم تختفي القائمة.</span>`;
+          }else{
+            if(foodPickerExpanded){
+              summary.innerHTML = `<strong>هذه اختياراتك الحالية (${selectedItems.length} صنفًا)</strong><br><span class="muted">إجمالي اختياراتك: ${totalKcal} سعرة • ${totalProtein} جم بروتين</span><br><span class="muted">يمكنك الآن إلغاء أي صنف لا تريده أو إضافة صنف جديد، ثم اضغط "حفظ اختيارات الأطعمة".</span>`;
+            }else{
+              summary.innerHTML = `<strong>${selectedItems.length} صنفًا محفوظًا</strong><br><span class="muted">إجمالي اختياراتك: ${totalKcal} سعرة • ${totalProtein} جم بروتين</span><br><span class="muted">تم إخفاء القائمة لتبقى الخطة واضحة. استخدم "تعديل الأصناف" أو "جدول آخر" متى احتجت.</span>`;
+            }
+          }
+
+          const previewIds = draftChanged ? foodDraftSelection : (saved.length ? saved : foodDraftSelection);
+          plan.innerHTML = buildDietChoicePlanHTML(previewIds);
+          setFoodPickerExpanded(foodPickerExpanded);
+        }
+
+        function saveFoodSelections(){
+          const unique = [...new Set(foodDraftSelection)].slice(0, 36);
+          saveDietPrefs({
+            selected: unique,
+            updatedAtClient: Date.now()
+          });
+          foodDraftSelection = unique.slice();
+          refreshFoodSummary();
+          setTimeout(() => { mirrorDietData(); }, 20);
+        }
+
+        function clearFoodSelections(){
+          foodDraftSelection = [];
+          saveDietPrefsState({
+            selected: [],
+            planVariant: 0
+          });
+          renderFoodPicker(document.getElementById('foodSearchInput')?.value || '');
+          setFoodPickerExpanded(true);
+          refreshFoodSummary();
+          setTimeout(() => { mirrorDietData(); }, 20);
+        }
+
+        function bindFoodPickerEvents(){
+          const wrap = document.getElementById('foodGroups');
+          const search = document.getElementById('foodSearchInput');
+          const saveBtn = document.getElementById('btnSaveFoodPrefs');
+          const clearBtn = document.getElementById('btnClearFoodPrefs');
+          const toggleBtn = document.getElementById('btnToggleFoodPicker');
+          const nextBtn = document.getElementById('btnNextDietVariant');
+
+          if(wrap && !wrap.dataset.bound){
+            wrap.dataset.bound = '1';
+            wrap.addEventListener('click', (e) => {
+              const btn = e.target.closest('.foodChip');
+              if(!btn) return;
+              const id = btn.dataset.foodId;
+              if(!id) return;
+              if(foodDraftSelection.includes(id)) foodDraftSelection = foodDraftSelection.filter(x => x !== id);
+              else foodDraftSelection.push(id);
+              renderFoodPicker(search?.value || '');
+              refreshFoodSummary();
+            });
+          }
+
+          if(search && !search.dataset.bound){
+            search.dataset.bound = '1';
+            search.addEventListener('input', () => renderFoodPicker(search.value));
+          }
+
+          if(saveBtn && !saveBtn.dataset.bound){
+            saveBtn.dataset.bound = '1';
+            saveBtn.addEventListener('click', saveFoodSelections);
+          }
+
+          if(clearBtn && !clearBtn.dataset.bound){
+            clearBtn.dataset.bound = '1';
+            clearBtn.addEventListener('click', clearFoodSelections);
+          }
+
+          if(toggleBtn && !toggleBtn.dataset.bound){
+            toggleBtn.dataset.bound = '1';
+            toggleBtn.addEventListener('click', () => {
+              const nextExpanded = !foodPickerExpanded;
+              if(nextExpanded){
+                foodDraftSelection = getSavedFoodSelection();
+                if(search) search.value = '';
+                renderFoodPicker('');
+              }
+              setFoodPickerExpanded(nextExpanded);
+              refreshFoodSummary();
+            });
+          }
+
+          if(nextBtn && !nextBtn.dataset.bound){
+            nextBtn.dataset.bound = '1';
+            nextBtn.addEventListener('click', () => {
+              const saved = getSavedFoodSelection();
+              if(!saved.length) return;
+              saveDietPrefsState({
+                selected: saved,
+                planVariant: getDietPlanVariant() + 1
+              });
+              foodDraftSelection = saved.slice();
+              refreshFoodSummary();
+              setTimeout(() => { mirrorDietData(); }, 20);
+            });
+          }
+        }
+
+        function initFoodPickerUI(){
+          foodDraftSelection = getSavedFoodSelection();
+          setFoodPickerExpanded(getSavedFoodSelection().length ? false : true);
+          bindFoodPickerEvents();
+          renderFoodPicker(document.getElementById('foodSearchInput')?.value || '');
+          refreshFoodSummary();
+        }
+
+        setTimeout(() => {
+          try{ initFoodPickerUI(); }catch(_e){}
+        }, 0);
+
+        function updateGreeting(){
+          const userName = document.getElementById('userNameText')?.textContent || '';
+          const rawProfileName = document.getElementById('name')?.value || '';
+          const name = normalizeName((rawProfileName && rawProfileName.trim()) ? rawProfileName : ((userName && userName !== 'غير مسجل') ? userName : ''));
+          const welcome = document.getElementById('welcomeGreeting');
+          const headerLine = document.getElementById('headerGreetingLine');
+          if(welcome) welcome.textContent = `مرحبًا ${name}`;
+          if(headerLine) headerLine.textContent = "";
+        }
+
+        function mirrorDietData(){
+          const cal = document.getElementById('calOut')?.textContent?.trim() || '—';
+          const pro = document.getElementById('proOut')?.textContent?.trim() || '—';
+          const calNote = document.getElementById('calNote')?.textContent?.trim() || '—';
+          const proNote = document.getElementById('proNote')?.textContent?.trim() || '—';
+          const planHTML = document.getElementById('mealPlanOut')?.innerHTML || 'أدخل بياناتك واضغط "احسب الآن".';
+          const logCount = document.getElementById('logCount')?.textContent?.trim() || '0 سطر';
+          const tdee = document.getElementById('tdeeOut')?.textContent?.trim() || '—';
+
+          const savedFoods = getSavedFoodSelection();
+
+          const qDaily = document.getElementById('homeQuickDaily');
+          const qDiet = document.getElementById('homeQuickDiet');
+          const qWorkout = document.getElementById('homeQuickWorkout');
+          if(qDaily) qDaily.textContent = (tdee && tdee !== '—') ? `TDEE: ${tdee}` : 'احسب الآن';
+          if(qDiet) qDiet.textContent = savedFoods.length ? `${savedFoods.length} أطعمة محفوظة` : ((cal && cal !== '—') ? `السعرات: ${cal}` : 'ستظهر بعد الحساب');
+          if(qWorkout) qWorkout.textContent = logCount;
+
+          const m1 = document.getElementById('dietCalMirror');
+          const m2 = document.getElementById('dietProMirror');
+          const m3 = document.getElementById('dietCalNoteMirror');
+          const m4 = document.getElementById('dietProNoteMirror');
+          const m5 = document.getElementById('dietPlanMirror');
+          const m6 = document.getElementById('dietChoicePlanMirror');
+          const m7 = document.getElementById('foodPickSummary');
+          if(m1) m1.textContent = cal;
+          if(m2) m2.textContent = pro;
+          if(m3) m3.textContent = calNote;
+          if(m4) m4.textContent = proNote;
+          if(m5) m5.innerHTML = planHTML;
+          if(m6) m6.innerHTML = buildDietChoicePlanHTML(savedFoods);
+          if(m7 && savedFoods.length){
+            const selectedItems = savedFoods.map(id => FOOD_LIBRARY.find(item => item.id === id)).filter(Boolean);
+            const totalKcal = selectedItems.reduce((sum, item) => sum + (Number(item.kcal) || 0), 0);
+            const totalProtein = Math.round(selectedItems.reduce((sum, item) => sum + (Number(item.protein) || 0), 0) * 10) / 10;
+            m7.innerHTML = `<strong>${savedFoods.length} صنفًا محفوظًا</strong><br><span class="muted">الإجمالي التقريبي: ${totalKcal} سعرة • ${totalProtein} جم بروتين</span><br><span class="muted">القائمة مخفية الآن لعرض جدول 7 أيام بشكل أوضح. استخدم "تعديل الأصناف" أو "جدول آخر" متى أردت.</span>`;
+          }else if(m7){
+            m7.innerHTML = '<strong>ابدأ اختيارك:</strong> اختر من كل مجموعة ما يناسبك ثم اضغط حفظ ليظهر لك جدول 7 أيام.';
+          }
+        }
+
+        // Observe app visibility (auth -> app)
+        const appObserver = new MutationObserver(() => {
+          if(!appMain.hidden) setMainMode();
+        });
+        appObserver.observe(appMain, { attributes:true, attributeFilter:['hidden'] });
+
+        // Observe dynamic texts
+        ['userNameText','name','calOut','proOut','calNote','proNote','mealPlanOut','logCount','tdeeOut'].forEach(id => {
+          const el = document.getElementById(id);
+          if(!el) return;
+          if(el.tagName === 'INPUT') el.addEventListener('input', updateGreeting);
+          const mo = new MutationObserver(() => { updateGreeting(); mirrorDietData(); });
+          mo.observe(el, { childList:true, subtree:true, characterData:true });
+        });
+
+        // Also listen to common action buttons for delayed UI refresh
+        ['calcBtn','saveBtn','addSetBtn','clearLogBtn','btnSaveAccount','btnLogin','btnRegister'].forEach(id => {
+          const el = document.getElementById(id);
+          if(el) el.addEventListener('click', () => setTimeout(() => { updateGreeting(); mirrorDietData(); }, 250));
+        });
+
+        // Initial state
+        applyProfileEditorUI(deriveProfileEditorState());
+        updateGreeting();
+        try{ initFoodPickerUI(); }catch(err){ console.warn("Food picker init failed:", err); }
+        try{ mirrorDietData(); }catch(err){ console.warn("Diet mirror failed:", err); }
+        if(!appMain.hidden) setMainMode();
+      });
+    })();
+  </script>
+
+</body>
+</html>
